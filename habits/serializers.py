@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from habits.models import HabitNice, HabitUseful
+from habits.validators import RewardOrNiceHabitValidator
 
 
 class HabitNiceSerializer(serializers.ModelSerializer):
@@ -11,7 +12,6 @@ class HabitNiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = HabitNice
         fields = '__all__'
-        #validators
         read_only_fields = ['user', 'is_pleasant', 'location_name', 'action_name']
 
 
@@ -26,8 +26,23 @@ class HabitUsefulSerializer(serializers.ModelSerializer):
     class Meta:
         model = HabitUseful
         fields = '__all__'
-        #validators
         read_only_fields = [
             'user', 'is_pleasant', 'location_name', 'action_name',
             'nice_habit_name', 'reward_name'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.validators.append(
+            RewardOrNiceHabitValidator(
+                reward_field='reward',
+                associated_habit_field='nice_habit'
+            )
+        )
+
+    def validate(self, data):
+        time_to_complete = data.get('do_time')
+        if time_to_complete is not None and time_to_complete > 120:
+            raise serializers.ValidationError("Время выполнения не может быть больше 120 секунд (2 минуты).")
+
+        return data
