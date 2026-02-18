@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'users',
-    'habits'
+    'habits',
+    'locareward'
 ]
 
 MIDDLEWARE = [
