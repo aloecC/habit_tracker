@@ -38,3 +38,5 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])  # Храните пароль в зашифрованном виде
         user.save()
         return user
+
+    

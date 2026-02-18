@@ -7,7 +7,7 @@ from users.models import User
 class CustomUserAdmin(UserAdmin):
     """Административный интерфейс для управления пользователями."""
     model = User
-    list_display = ["email", "username", "phone_number", "is_staff"]
+    list_display = ["email", "username", "phone_number", "is_staff", "is_active"]
     list_filter = ["is_staff", "is_active"]
     ordering = ["email"]
     search_fields = ["email", "username"]

@@ -71,6 +71,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000' # Замените на адрес вашего фронтенд-сервера
+]
+CORS_ALLOW_ALL_ORIGINS = False
+
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
@@ -87,6 +93,23 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+
+
+REST_FRAMEWORK = {
+        'DEFAULT_FILTER_BACKENDS': (
+            'django_filters.rest_framework.DjangoFilterBackend',
+        ),
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+            'rest_framework.authentication.SessionAuthentication', # Для админки и тестирования
+        ),
+        'DEFAULT_PERMISSION_CLASSES': (
+            'rest_framework.permissions.AllowAny', #IsAuthenticated - если нужно на все поставить условие автризации
+        ),
+        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+        'PAGE_SIZE': 10,
+    }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -125,17 +148,7 @@ MEDIA_URL = "/media/"  # Маршрут для доступа к медиа-фа
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Настройки Django REST Framework
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication', # Для админки и тестирования
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated', # По умолчанию все API требуют аутентификации
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-}
+
 
 CACHES = {
     "default": {
