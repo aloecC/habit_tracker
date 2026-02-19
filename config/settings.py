@@ -1,6 +1,7 @@
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -12,12 +13,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -29,16 +30,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'drf_yasg',
-    'corsheaders',
-    'django_celery_beat',
-    'django_celery_results',
-    'users',
-    'habits',
-    'locareward'
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_yasg",
+    "corsheaders",
+    "django_celery_beat",
+    "django_celery_results",
+    "users",
+    "habits",
+    "locareward",
 ]
 
 MIDDLEWARE = [
@@ -72,7 +72,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000' # Замените на адрес вашего фронтенд-сервера
+    "http://localhost:8000"  # Замените на адрес вашего фронтенд-сервера
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 
@@ -96,19 +96,17 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-        'DEFAULT_FILTER_BACKENDS': (
-            'django_filters.rest_framework.DjangoFilterBackend',
-        ),
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-            'rest_framework.authentication.SessionAuthentication', # Для админки и тестирования
-        ),
-        'DEFAULT_PERMISSION_CLASSES': (
-            'rest_framework.permissions.AllowAny', #IsAuthenticated - если нужно на все поставить условие автризации
-        ),
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGE_SIZE': 10,
-    }
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # Для админки и тестирования
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",  # IsAuthenticated - если нужно на все поставить условие автризации
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -142,7 +140,9 @@ USE_TZ = True  # Поддержка временных зон
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"  # Маршрут для доступа к статике
-STATICFILES_DIRS = [BASE_DIR / "static"]  # Список директорий на диске из которых подгружаются статические файлы
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]  # Список директорий на диске из которых подгружаются статические файлы
 
 MEDIA_URL = "/media/"  # Маршрут для доступа к медиа-файлам
 MEDIA_ROOT = BASE_DIR / "media"
@@ -157,8 +157,8 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 
 
 # Default primary key field type

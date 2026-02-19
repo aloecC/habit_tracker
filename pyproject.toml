@@ -25,6 +25,10 @@ django-celery-results = "^2.6.0"
 python-dotenv = "^1.2.1"
 django = ">=4.2,<6.0"
 django-celery-beat = "^2.8.1"
+flake8 = "^7.3.0"
+black = "^26.1.0"
+mypy = "^1.19.1"
+isort = "^7.0.0"
 
 
 [build-system]

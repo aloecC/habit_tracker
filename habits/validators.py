@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 class RewardOrNiceHabitValidator:
     """Валидатор для проверки корректного указания вознаграждения/приятной привычки"""
+
     def __init__(self, reward_field, associated_habit_field):
         self.reward_field = reward_field
         self.associated_habit_field = associated_habit_field
