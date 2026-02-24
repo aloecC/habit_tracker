@@ -1146,6 +1146,7 @@ class Command(BaseCommand):
             map_to_parent={MENU: MENU},
         )
 
+
         # --- Conversation Handler для создания полезной привычки (HabitUseful) ---
         create_useful_habit_conv_handler = ConversationHandler(
             entry_points=[
