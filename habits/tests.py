@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from habits.models import HabitNice, HabitUseful
-from locareward.models import Location, Action, Reward
+from locareward.models import Location, Reward, LikeAction, NeedAction
 from users.models import User
 
 
@@ -17,16 +17,16 @@ class HabitNiceTest(APITestCase):
         self.moderator_group.user_set.add(self.moderator)
 
         self.location = Location.objects.create(name='Дом', description='Test Description', owner=self.user)
-        self.action = Action.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
-        self.action_2 = Action.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action = LikeAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action_2 = LikeAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
 
-        self.habit_nice = HabitNice.objects.create(action=self.action, location=self.location, user=self.user)
+        self.habit_nice = HabitNice.objects.create(like_action=self.action, location=self.location, user=self.user)
 
     def test_create_habit_nice(self):
         """Тест создания приятной привычки"""
         self.client.force_authenticate(user=self.user)
         data = {
-            'action': f"{self.action.id}",
+            'like_action': f"{self.action.id}",
             'location': f'{self.location.id}'
         }
         response = self.client.post(
@@ -44,7 +44,7 @@ class HabitNiceTest(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'action': f'{self.action_2.id}',
+            'like_action': f'{self.action_2.id}',
             'location': f'{self.location.id}',
         }
         response = self.client.patch(
@@ -117,20 +117,18 @@ class HabitUsefulTest(APITestCase):
         self.moderator_group.user_set.add(self.moderator)
 
         self.location = Location.objects.create(name='Дом', description='Test Description', owner=self.user)
-        self.action = Action.objects.create(name='Холодный душ', description='Test Description', owner=self.user)
-        self.action_2 = Action.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action = NeedAction.objects.create(name='Холодный душ', description='Test Description', owner=self.user)
+        self.action_2 = NeedAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
         self.reward = Reward.objects.create(name='Шоколад', description='Test Description', owner=self.user)
 
-        self.habit_userful = HabitUseful.objects.create(action=self.action, location=self.location, reward=self.reward, user=self.user)
-        self.habit_userful_2 = HabitUseful.objects.create(action=self.action_2, location=self.location, reward=self.reward,
-                                                        user=self.user, is_public=True)
-        self.habit_nice = HabitNice.objects.create(action=self.action, location=self.location, user=self.user)
+        self.habit_userful = HabitUseful.objects.create(need_action=self.action, location=self.location, reward=self.reward, user=self.user)
+        self.habit_userful_2 = HabitUseful.objects.create(need_action=self.action_2, location=self.location, reward=self.reward, user=self.user, is_public=True)
 
     def test_create_habit_userful(self):
         """Тест создания полезной привычки"""
         self.client.force_authenticate(user=self.user)
         data = {
-            'action': f"{self.action.id}",
+            'need_action': f"{self.action.id}",
             'location': f'{self.location.id}',
             'reward': f'{self.reward.id}'
         }
@@ -149,7 +147,7 @@ class HabitUsefulTest(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'action': f'{self.action_2.id}',
+            'need_action': f'{self.action_2.id}',
             'location': f'{self.location.id}',
             'reward': f'{self.reward.id}'
         }
@@ -186,7 +184,7 @@ class HabitUsefulTest(APITestCase):
         self.assertEqual(results[0]['location'], self.location.id)
 
     def test_list_public_habit_userful(self):
-        """Тест вывода списка публичгных полезных привычек"""
+        """Тест вывода списка публичнных полезных привычек"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
@@ -205,7 +203,7 @@ class HabitUsefulTest(APITestCase):
 
         results = response.json()['results']
         self.assertGreater(len(results), 0)
-        self.assertEqual(results[0]['action'], self.action_2.id)
+        self.assertEqual(results[0]['need_action'], self.action_2.id)
 
     def test_retrieve_habit_userful(self):
         """Тест просмотра полезной привычки"""

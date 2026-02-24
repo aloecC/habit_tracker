@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.test import APITestCase
-from locareward.models import Location, Action, Reward
+from locareward.models import Location, Reward, LikeAction, NeedAction
 from users.models import User
 
 
@@ -103,8 +103,8 @@ class LocationTest(APITestCase):
         self.assertIsNone(Location.objects.filter(id=self.location.id).first())
 
 
-class ActionTest(APITestCase):
-    """Тесты проверки действия"""
+class LikeActionTest(APITestCase):
+    """Тесты проверки любимых действий"""
     def setUp(self):
         # Создаем группы
         self.moderator_group = Group.objects.create(name='Модераторы')
@@ -115,17 +115,17 @@ class ActionTest(APITestCase):
         self.moderator_group.user_set.add(self.moderator)
 
         # Создаем курс и урок для тестирования
-        self.action = Action.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action = LikeAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
 
-    def test_create_action(self):
-        """Тест создания действия"""
+    def test_create_like_action(self):
+        """Тест создания любимого действия"""
         self.client.force_authenticate(user=self.user)
         data = {
             'name': 'Test',
             'description': 'Test'
         }
         response = self.client.post(
-            '/locareward/actions/',
+            '/locareward/likeactions/',
             data=data
         )
 
@@ -134,15 +134,15 @@ class ActionTest(APITestCase):
             status.HTTP_201_CREATED
         )
 
-    def test_update_action(self):
-        """Тест обновления действия"""
+    def test_update_like_action(self):
+        """Тест обновления любимого действия"""
         self.client.force_authenticate(user=self.user)
 
         data = {
             'name': 'U Test',
         }
         response = self.client.patch(
-            f'/locareward/actions/{self.action.id}/',
+            f'/locareward/likeactions/{self.action.id}/',
             data=data
         )
 
@@ -151,12 +151,12 @@ class ActionTest(APITestCase):
             status.HTTP_200_OK
         )
 
-    def test_list_action(self):
-        """Тест вывода списка действия"""
+    def test_list_like_action(self):
+        """Тест вывода списка любимоых действий"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            '/locareward/actions/',
+            '/locareward/likeactions/',
         )
 
         self.assertEqual(
@@ -173,12 +173,12 @@ class ActionTest(APITestCase):
         self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
         self.assertEqual(results[0]['name'], 'Бегать по утрам')  # Проверяем название
 
-    def test_retrieve_action(self):
-        """Тест просмотра действия"""
+    def test_retrieve_like_action(self):
+        """Тест просмотра любимого действия"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            f'/locareward/actions/{self.action.id}/',
+            f'/locareward/likeactions/{self.action.id}/',
         )
 
         self.assertEqual(
@@ -186,19 +186,117 @@ class ActionTest(APITestCase):
             status.HTTP_200_OK
         )
 
-    def test_delete_action(self):
-        """Тест удаления действия"""
+    def test_delete_like_action(self):
+        """Тест удаления любимого действия"""
         self.client.force_authenticate(user=self.user)
 
-        self.assertIsNotNone(Action.objects.filter(id=self.action.id).first())
+        self.assertIsNotNone(LikeAction.objects.filter(id=self.action.id).first())
 
         response = self.client.delete(
-            f'/locareward/actions/{self.action.id}/',
+            f'/locareward/likeactions/{self.action.id}/',
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        self.assertIsNone(Action.objects.filter(id=self.action.id).first())
+        self.assertIsNone(LikeAction.objects.filter(id=self.action.id).first())
+
+
+class NeedActionTest(APITestCase):
+    """Тесты проверки нужных действия"""
+    def setUp(self):
+        # Создаем группы
+        self.moderator_group = Group.objects.create(name='Модераторы')
+
+        # Создаем пользователей и добавляем их в группы
+        self.user = User.objects.create_user(username='user', email='user@mail.ru', password='password')
+        self.moderator = User.objects.create_user(username='moderator', email='moderator@mail.ru', password='password')
+        self.moderator_group.user_set.add(self.moderator)
+
+        # Создаем курс и урок для тестирования
+        self.action = NeedAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+
+    def test_create_need_action(self):
+        """Тест создания нужного действия"""
+        self.client.force_authenticate(user=self.user)
+        data = {
+            'name': 'Test',
+            'description': 'Test'
+        }
+        response = self.client.post(
+            '/locareward/needactions/',
+            data=data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+
+    def test_update_need_action(self):
+        """Тест обновления нужного действия"""
+        self.client.force_authenticate(user=self.user)
+
+        data = {
+            'name': 'U Test',
+        }
+        response = self.client.patch(
+            f'/locareward/needactions/{self.action.id}/',
+            data=data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+    def test_list_need_action(self):
+        """Тест вывода списка нужных действий"""
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(
+            '/locareward/needactions/',
+        )
+
+        self.assertEqual(
+         response.status_code,
+         status.HTTP_200_OK
+     )
+
+        self.assertIsInstance(response.json(), dict)
+
+        self.assertIn('results', response.json())
+        self.assertIsInstance(response.json()['results'], list)
+
+        results = response.json()['results']
+        self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
+        self.assertEqual(results[0]['name'], 'Бегать по утрам')  # Проверяем название
+
+    def test_retrieve_need_action(self):
+        """Тест просмотра нужного действия"""
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(
+            f'/locareward/needactions/{self.action.id}/',
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+    def test_delete_need_action(self):
+        """Тест удаления нужного действия"""
+        self.client.force_authenticate(user=self.user)
+
+        self.assertIsNotNone(NeedAction.objects.filter(id=self.action.id).first())
+
+        response = self.client.delete(
+            f'/locareward/needactions/{self.action.id}/',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertIsNone(NeedAction.objects.filter(id=self.action.id).first())
 
 
 class RewardTest(APITestCase):

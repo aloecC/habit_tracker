@@ -27,12 +27,23 @@ class Location(BaseInfo):
         return self.name
 
 
-class Action(BaseInfo):
-    """Модель Действий"""
+class LikeAction(BaseInfo):
+    """Модель любимых Действий"""
 
     class Meta:
-        verbose_name = "Действие"
-        verbose_name_plural = "Действия"
+        verbose_name = "Любимое действие"
+        verbose_name_plural = "Любимые действия"
+
+    def __str__(self):
+        return self.name
+
+
+class NeedAction(BaseInfo):
+    """Модель нужных Действий"""
+
+    class Meta:
+        verbose_name = "Нужное действие"
+        verbose_name_plural = "Нужные действия"
 
     def __str__(self):
         return self.name

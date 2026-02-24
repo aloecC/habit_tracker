@@ -8,24 +8,24 @@ class HabitNiceSerializer(serializers.ModelSerializer):
     """Сериализатор приятных привычек"""
 
     location_name = serializers.CharField(source="location.name", read_only=True)
-    action_name = serializers.CharField(source="action.name", read_only=True)
+    like_action_name = serializers.CharField(source="like_action.name", read_only=True)
     user_name = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = HabitNice
         fields = "__all__"
-        read_only_fields = ["user", "is_pleasant", "location_name", "action_name"]
+        read_only_fields = ["user", "is_pleasant", "location_name", "like_action_name"]
 
 
 class HabitUsefulSerializer(serializers.ModelSerializer):
     """Сериализатор полезных привычек"""
 
     location_name = serializers.CharField(source="location.name", read_only=True)
-    action_name = serializers.CharField(source="action.name", read_only=True)
+    need_action_name = serializers.CharField(source="need_action.name", read_only=True)
     user_name = serializers.CharField(source="user.username", read_only=True)
 
     nice_habit_name = serializers.CharField(
-        source="nice_habit.action.name", read_only=True
+        source="nice_habit.like_action.name", read_only=True
     )
     reward_name = serializers.CharField(source="reward.name", read_only=True)
 
@@ -36,7 +36,7 @@ class HabitUsefulSerializer(serializers.ModelSerializer):
             "user",
             "is_pleasant",
             "location_name",
-            "action_name",
+            "need_action_name",
             "nice_habit_name",
             "reward_name",
         ]

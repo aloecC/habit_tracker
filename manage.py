@@ -2,6 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 
 def main():

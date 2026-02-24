@@ -3,10 +3,12 @@ from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     city = models.CharField(max_length=15, blank=True, null=True)
+
+    telegram_chat_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="Telegram Chat ID")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = [

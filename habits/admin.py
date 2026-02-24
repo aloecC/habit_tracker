@@ -6,15 +6,15 @@ from habits.models import HabitNice, HabitUseful
 class HabitUsefulAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления полезными привычками."""
 
-    list_display = ('id', "user", "location", "action", "periodicity")
-    list_filter = ("user", "location", "action")
-    search_fields = ("user", "location", "action", "reward", "nice_habit")
+    list_display = ('id', "user", "location", 'periodicity')
+    list_filter = ("user", "location")
+    search_fields = ("user", "location", "reward", 'need_action')
 
 
 @admin.register(HabitNice)
 class HabitNiceAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления приятными привычками."""
 
-    list_display = ('id', "user", "location", "action")
-    list_filter = ("user", "location", "action")
-    search_fields = ("user", "location", "action")
+    list_display = ('id', "user", "location")
+    list_filter = ("user", "location")
+    search_fields = ("user", "location", 'like_action')

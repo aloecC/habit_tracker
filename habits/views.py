@@ -5,7 +5,7 @@ from habits.models import HabitNice, HabitUseful
 from habits.paginators import HabitsPagination
 from habits.permisions import IsModerator, IsOwner
 from habits.serializers import HabitNiceSerializer, HabitUsefulSerializer
-from locareward.models import Location, Reward, Action
+from locareward.models import Location, Reward, NeedAction, LikeAction
 from users.models import User
 
 
@@ -15,7 +15,7 @@ class HabitUsefulCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        action_id = self.request.data.get('action')
+        action_id = self.request.data.get('need_action')
 
         if self.request.data.get('reward'):
             reward_id = self.request.data.get('reward')
@@ -38,12 +38,12 @@ class HabitUsefulCreateAPIView(generics.CreateAPIView):
                 raise PermissionDenied("Приятная привычка не найдена")
 
         try:
-            action = Action.objects.get(id=action_id)
+            action = NeedAction.objects.get(id=action_id)
 
             if action.owner and action.owner != self.request.user:
                 raise PermissionDenied("Вы не можете добавлять чужие действия")
 
-        except Action.DoesNotExist:
+        except NeedAction.DoesNotExist:
             raise PermissionDenied("Действие не найдено")
 
         try:
@@ -126,15 +126,15 @@ class HabitNiceCreateAPIView(generics.CreateAPIView):
     serializer_class = HabitNiceSerializer
 
     def perform_create(self, serializer):
-        action_id = self.request.data.get('action')
+        action_id = self.request.data.get('like_action')
         location_id = self.request.data.get('location')
         try:
-            action = Action.objects.get(id=action_id)
+            action = LikeAction.objects.get(id=action_id)
 
             if action.owner and action.owner != self.request.user:
                 raise PermissionDenied("Вы не можете добавлять чужие действия")
 
-        except Action.DoesNotExist:
+        except LikeAction.DoesNotExist:
             raise PermissionDenied("Действие не найдено")
 
         try:
