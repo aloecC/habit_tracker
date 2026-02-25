@@ -2,21 +2,26 @@ from rest_framework import viewsets
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from locareward.models import Location, Reward, LikeAction, NeedAction
+from locareward.models import LikeAction, Location, NeedAction, Reward
 from locareward.paginators import LocarewardPagination
-from locareward.permisions import IsOwner, IsModerator
-from locareward.serializers import (LocationSerializer,
-                                    RewardSerializer, LikeActionSerializer, NeedActionSerializer)
+from locareward.permisions import IsModerator, IsOwner
+from locareward.serializers import (
+    LikeActionSerializer,
+    LocationSerializer,
+    NeedActionSerializer,
+    RewardSerializer,
+)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
     """Виев-сет для локации"""
+
     serializer_class = LocationSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = LocarewardPagination
 
     def get_queryset(self):
-        if self.action == 'list':
+        if self.action == "list":
             if self.request.user.is_authenticated:
                 if self.request.user.groups.filter(name="Модераторы").exists():
                     return Location.objects.all()
@@ -30,11 +35,11 @@ class LocationViewSet(viewsets.ModelViewSet):
         return super().list(self, request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ['create', 'list']:
+        if self.action in ["create", "list"]:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             self.permission_classes = [IsOwner]
-        elif self.action in ['retrieve', 'destroy']:
+        elif self.action in ["retrieve", "destroy"]:
             self.permission_classes = [IsOwner | IsModerator]
         else:
             self.permission_classes = [IsAuthenticated]
@@ -50,13 +55,14 @@ class LocationViewSet(viewsets.ModelViewSet):
 
 class NeedActionViewSet(viewsets.ModelViewSet):
     """Виев-сет для нужных действия"""
+
     serializer_class = NeedActionSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = LocarewardPagination
 
     def get_queryset(self):
 
-        if self.action == 'list':
+        if self.action == "list":
             if self.request.user.is_authenticated:
                 if self.request.user.groups.filter(name="Модераторы").exists():
                     return NeedAction.objects.all()
@@ -70,11 +76,11 @@ class NeedActionViewSet(viewsets.ModelViewSet):
         return super().list(self, request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ['create', 'list']:
+        if self.action in ["create", "list"]:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             self.permission_classes = [IsOwner]
-        elif self.action in ['retrieve', 'destroy']:
+        elif self.action in ["retrieve", "destroy"]:
             self.permission_classes = [IsOwner | IsModerator]
         else:
             self.permission_classes = [IsAuthenticated]
@@ -90,13 +96,14 @@ class NeedActionViewSet(viewsets.ModelViewSet):
 
 class LikeActionViewSet(viewsets.ModelViewSet):
     """Виев-сет для любимых действия"""
+
     serializer_class = LikeActionSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = LocarewardPagination
 
     def get_queryset(self):
 
-        if self.action == 'list':
+        if self.action == "list":
             if self.request.user.is_authenticated:
                 if self.request.user.groups.filter(name="Модераторы").exists():
                     return LikeAction.objects.all()
@@ -110,11 +117,11 @@ class LikeActionViewSet(viewsets.ModelViewSet):
         return super().list(self, request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ['create', 'list']:
+        if self.action in ["create", "list"]:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             self.permission_classes = [IsOwner]
-        elif self.action in ['retrieve', 'destroy']:
+        elif self.action in ["retrieve", "destroy"]:
             self.permission_classes = [IsOwner | IsModerator]
         else:
             self.permission_classes = [IsAuthenticated]
@@ -130,12 +137,13 @@ class LikeActionViewSet(viewsets.ModelViewSet):
 
 class RewardViewSet(viewsets.ModelViewSet):
     """Виев-сет для вознаграждения"""
+
     serializer_class = RewardSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = LocarewardPagination
 
     def get_queryset(self):
-        if self.action == 'list':
+        if self.action == "list":
             if self.request.user.is_authenticated:
                 if self.request.user.groups.filter(name="Модераторы").exists():
                     return Reward.objects.all()
@@ -149,11 +157,11 @@ class RewardViewSet(viewsets.ModelViewSet):
         return super().list(self, request, *args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ['create', 'list']:
+        if self.action in ["create", "list"]:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update']:
+        elif self.action in ["update", "partial_update"]:
             self.permission_classes = [IsOwner]
-        elif self.action in ['retrieve', 'destroy']:
+        elif self.action in ["retrieve", "destroy"]:
             self.permission_classes = [IsOwner | IsModerator]
         else:
             self.permission_classes = [IsAuthenticated]

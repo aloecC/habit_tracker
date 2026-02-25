@@ -1,11 +1,9 @@
-from django.utils import timezone
 import datetime
-from celery import current_app
+
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
 
-from locareward.models import LikeAction, NeedAction, Location, Reward, NeedAction, LikeAction
+from locareward.models import LikeAction, Location, NeedAction, Reward
 
 
 class HabitBaseInfo(models.Model):
@@ -113,7 +111,3 @@ class HabitUseful(HabitBaseInfo):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
-
-
-
-

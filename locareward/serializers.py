@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from locareward.models import Location, Reward, NeedAction, LikeAction
+from locareward.models import LikeAction, Location, NeedAction, Reward
 
 
 class LocationSerializer(serializers.ModelSerializer):

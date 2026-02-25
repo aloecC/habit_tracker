@@ -9,15 +9,32 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update,
+)
 from telegram.error import TelegramError
-from telegram.ext import CallbackQueryHandler  # Добавляем CallbackQueryHandler
-from telegram.ext import (Application, CommandHandler, ContextTypes,
-                          ConversationHandler, MessageHandler, filters)
+from telegram.ext import (
+    Application,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
-from habits.models import (HabitNice, HabitUseful, LikeAction, Location,
-                           NeedAction, Reward)
+from habits.models import (
+    HabitNice,
+    HabitUseful,
+    LikeAction,
+    Location,
+    NeedAction,
+    Reward,
+)
 
 User = get_user_model()
 logger = logging.getLogger("bot_app")
@@ -407,7 +424,7 @@ async def create_nice_habit_start(
 ) -> int:
     django_user = context.user_data["django_user"]
     # Мы строим запрос (это быстро и синхронно)
-    queryset = LikeAction.objects.filter(owner=django_user).values_list('name', 'id')
+    queryset = LikeAction.objects.filter(owner=django_user).values_list("name", "id")
 
     # А вот здесь мы асинхронно выкачиваем данные из базы в обычный список
     like_actions = [item async for item in queryset]
@@ -503,7 +520,7 @@ async def create_nice_habit_select_location_prompt(
 ) -> int:
     django_user = context.user_data["django_user"]
 
-    queryset = Location.objects.filter(owner=django_user).values_list('name', 'id')
+    queryset = Location.objects.filter(owner=django_user).values_list("name", "id")
 
     locations = [item async for item in queryset]
 
@@ -555,8 +572,16 @@ async def save_nice_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     like_action_id = context.user_data.get("nice_habit_like_action_id")
     location_id = context.user_data.get("nice_habit_location_id")
 
-    like_action = await sync_to_async(LikeAction.objects.get)(id=like_action_id) if like_action_id else None
-    location = await sync_to_async(Location.objects.get)(id=location_id) if location_id else None
+    like_action = (
+        await sync_to_async(LikeAction.objects.get)(id=like_action_id)
+        if like_action_id
+        else None
+    )
+    location = (
+        await sync_to_async(Location.objects.get)(id=location_id)
+        if location_id
+        else None
+    )
     try:
         await sync_to_async(transaction.atomic)()
         await sync_to_async(HabitNice.objects.create)(
@@ -565,10 +590,10 @@ async def save_nice_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             location=location,
             is_pleasant=True,  # Приятная привычка всегда pleasant
         )
-        #like_action = (
+        # like_action = (
         #    await LikeAction.objects.aget(id=like_action_id) if like_action_id else None
-        #)
-        #location = await Location.objects.aget(id=location_id) if location_id else None
+        # )
+        # location = await Location.objects.aget(id=location_id) if location_id else None
 
         await (update.effective_message or update.message).reply_text(
             "🎉 Приятная привычка успешно создана!",
@@ -601,7 +626,7 @@ async def create_useful_habit_start(
 ) -> int:
     django_user = context.user_data["django_user"]
 
-    queryset = NeedAction.objects.filter(owner=django_user).values_list('name', 'id')
+    queryset = NeedAction.objects.filter(owner=django_user).values_list("name", "id")
 
     need_actions = [item async for item in queryset]
 
@@ -669,7 +694,9 @@ async def create_useful_habit_new_need_action_name(
     action_name = update.message.text
     django_user = context.user_data["django_user"]
     # Используем sync_to_async для фильтрации
-    like_action_exists = await sync_to_async(lambda: NeedAction.objects.filter(name=action_name, owner=django_user).exists())()
+    like_action_exists = await sync_to_async(
+        lambda: NeedAction.objects.filter(name=action_name, owner=django_user).exists()
+    )()
     if like_action_exists:
         await update.message.reply_text(
             f"Нужное действие с названием '{action_name}' уже существует. Введите другое название."
@@ -709,7 +736,7 @@ async def create_useful_habit_select_location_prompt(
 ) -> int:
     django_user = context.user_data["django_user"]
 
-    queryset = Location.objects.filter(owner=django_user).values_list('name', 'id')
+    queryset = Location.objects.filter(owner=django_user).values_list("name", "id")
 
     locations = [item async for item in queryset]
 
@@ -836,7 +863,7 @@ async def create_useful_habit_select_reward_or_nice_habit(
 
     if choice == "🏆 Вознаграждение":
 
-        queryset = Reward.objects.filter(owner=django_user).values_list('name', 'id')
+        queryset = Reward.objects.filter(owner=django_user).values_list("name", "id")
 
         rewards = [item async for item in queryset]
 
@@ -861,13 +888,16 @@ async def create_useful_habit_select_reward_or_nice_habit(
         return CREATE_USEFUL_HABIT_SELECT_REWARD
     elif choice == "✨ Приятная привычка":
         nice_habits = await sync_to_async(
-            lambda: list(HabitNice.objects.filter(user=django_user).select_related("like_action")))()
+            lambda: list(
+                HabitNice.objects.filter(user=django_user).select_related("like_action")
+            )
+        )()
 
-        #nice_habits = (
+        # nice_habits = (
         #    await HabitNice.objects.filter(user=django_user)
-         #   .select_related("like_action")
+        #   .select_related("like_action")
         #    .aall()
-        #)
+        # )
 
         keyboard = []
         if nice_habits:
@@ -921,12 +951,14 @@ async def create_useful_habit_select_reward(
         context.user_data["useful_habit_nice_habit_id"] = None
         await query.edit_message_text(
             "Вознаграждение выбрано. Хотите, чтобы другие пользователи могли использовать вашу привычку? (Да/Нет)",
-            reply_markup=InlineKeyboardMarkup([
+            reply_markup=InlineKeyboardMarkup(
                 [
-                    InlineKeyboardButton("Да", callback_data="public_yes"),
-                    InlineKeyboardButton("Нет", callback_data="public_no")
+                    [
+                        InlineKeyboardButton("Да", callback_data="public_yes"),
+                        InlineKeyboardButton("Нет", callback_data="public_no"),
+                    ]
                 ]
-            ])
+            ),
         )
         return CREATE_USEFUL_HABIT_IS_PUBLIC
 
@@ -942,13 +974,16 @@ async def create_useful_habit_select_nice_habit(
     context.user_data["useful_habit_reward_id"] = None
     await query.edit_message_text(
         "Вознаграждение выбрано. Хотите, чтобы другие пользователи могли использовать вашу привычку? (Да/Нет)",
-        reply_markup=InlineKeyboardMarkup([
+        reply_markup=InlineKeyboardMarkup(
             [
-                InlineKeyboardButton("Да", callback_data="public_yes"),
-                InlineKeyboardButton("Нет", callback_data="public_no")
+                [
+                    InlineKeyboardButton("Да", callback_data="public_yes"),
+                    InlineKeyboardButton("Нет", callback_data="public_no"),
+                ]
             ]
-        ])
+        ),
     )
+
     return CREATE_USEFUL_HABIT_IS_PUBLIC
 
 
@@ -960,11 +995,11 @@ async def save_useful_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     # 1. Получаем выбор публичности
     if query:
         await query.answer()
-        is_public = (query.data == "public_yes")
+        is_public = query.data == "public_yes"
         # Редактируем сообщение, чтобы кнопки исчезли после нажатия
         await query.edit_message_text("Обработка данных...")
     elif update.message and update.message.text:
-        is_public = (update.message.text.strip().lower() == "да")
+        is_public = update.message.text.strip().lower() == "да"
     else:
         return MENU
 
@@ -979,10 +1014,26 @@ async def save_useful_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     try:
         # Получаем объекты БД (используем sync_to_async для синхронных методов Django)
-        need_action = await sync_to_async(NeedAction.objects.filter(id=need_action_id).first)() if need_action_id else None
-        location = await sync_to_async(Location.objects.filter(id=location_id).first)() if location_id else None
-        reward = await sync_to_async(Reward.objects.filter(id=reward_id).first)() if reward_id else None
-        nice_habit = await sync_to_async(HabitNice.objects.filter(id=nice_habit_id).first)() if nice_habit_id else None
+        need_action = (
+            await sync_to_async(NeedAction.objects.filter(id=need_action_id).first)()
+            if need_action_id
+            else None
+        )
+        location = (
+            await sync_to_async(Location.objects.filter(id=location_id).first)()
+            if location_id
+            else None
+        )
+        reward = (
+            await sync_to_async(Reward.objects.filter(id=reward_id).first)()
+            if reward_id
+            else None
+        )
+        nice_habit = (
+            await sync_to_async(HabitNice.objects.filter(id=nice_habit_id).first)()
+            if nice_habit_id
+            else None
+        )
 
         def create_habit():
             with transaction.atomic():
@@ -1019,6 +1070,7 @@ async def save_useful_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         )
 
     return MENU
+
 
 class Command(BaseCommand):
     help = "Запуск Telegram бота"
@@ -1162,7 +1214,6 @@ class Command(BaseCommand):
             map_to_parent={MENU: MENU},
         )
 
-
         # --- Conversation Handler для создания полезной привычки (HabitUseful) ---
         create_useful_habit_conv_handler = ConversationHandler(
             entry_points=[
@@ -1251,7 +1302,7 @@ class Command(BaseCommand):
                 CREATE_USEFUL_HABIT_IS_PUBLIC: [
                     CallbackQueryHandler(
                         lambda u, c: check_user_and_call_next(u, c, save_useful_habit),
-                        pattern="^public_"  # Будет ловить и public_yes, и public_no
+                        pattern="^public_",  # Будет ловить и public_yes, и public_no
                     )
                 ],
                 CREATE_REWARD_NAME: [
