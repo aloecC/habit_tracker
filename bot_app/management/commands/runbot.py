@@ -68,8 +68,9 @@ logger = logging.getLogger("bot_app")
     CREATE_USEFUL_HABIT_SELECT_REWARD,
     CREATE_USEFUL_HABIT_SELECT_NICE_HABIT,
     CREATE_USEFUL_HABIT_IS_PUBLIC,
+    VIEW_HABITS
 ) = range(
-    27
+    28
 )  # Увеличиваем диапазон
 
 # Хелперы для клавиатур
@@ -1072,6 +1073,54 @@ async def save_useful_habit(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return MENU
 
 
+async def get_django_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Получает или создает полезные привычки"""
+    django_user = context.user_data["django_user"]
+    need_habits = await sync_to_async(
+        lambda: list(
+            HabitUseful.objects.filter(user=django_user).select_related("need_action")
+        )
+    )()
+
+    keyboard = []
+    if need_habits:
+        for nh in need_habits:
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        (
+                            nh.need_action.name
+                            if nh.need_action
+                            else f"Полезная привычка ID:{nh.id}"
+                        ),
+                        callback_data="-",
+                    )
+                ]
+            )
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                "➕ Создать новую полезную привычку",
+                callback_data="create_useful_habit_start",
+            )
+        ]
+    )
+
+    reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
+
+    await update.message.reply_text(
+        "Чтобы выйти нажмите '-'):",
+        reply_markup=reply_markup,
+    )
+
+    if not need_habits:
+        await update.message.reply_text(
+            "У вас пока нет полезных привычек. Сначала создайте их."
+        )
+        return MENU
+    return MENU
+
+
 class Command(BaseCommand):
     help = "Запуск Telegram бота"
 
@@ -1084,9 +1133,16 @@ class Command(BaseCommand):
         )  # Start уже устанавливает django_user
         application.add_handler(CommandHandler("cancel", cancel))
 
-        # --- Conversation Handler для создания Action, Location, Reward ---
+
+        # --- Conversation Handler для создания Action, Location, Reward и просмотра HabitNice---
         create_stuff_handler = ConversationHandler(
             entry_points=[
+                MessageHandler(
+                    filters.Regex(r"^📊 Мои привычки$"),
+                    lambda u, c: check_user_and_call_next(
+                        u, c, get_django_habits,
+                    ),
+                ),
                 MessageHandler(
                     filters.Regex(r"^➕ Добавить любимое действие$"),
                     lambda u, c: check_user_and_call_next(
@@ -1109,6 +1165,9 @@ class Command(BaseCommand):
                 ),
             ],
             states={
+                VIEW_HABITS: [
+                    MessageHandler(filters.TEXT & ~filters.COMMAND, get_django_habits)
+                ],
                 CREATE_LIKE_ACTION_NAME: [
                     MessageHandler(
                         filters.TEXT & ~filters.COMMAND, create_like_action_name
@@ -1151,6 +1210,7 @@ class Command(BaseCommand):
             fallbacks=[CommandHandler("cancel", cancel)],
             map_to_parent={MENU: MENU},
         )
+
 
         # --- Conversation Handler для создания приятной привычки (HabitNice) ---
         create_nice_habit_conv_handler = ConversationHandler(
