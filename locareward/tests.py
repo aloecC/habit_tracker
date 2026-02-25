@@ -1,92 +1,81 @@
 from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.test import APITestCase
-from locareward.models import Location, Reward, LikeAction, NeedAction
+
+from locareward.models import LikeAction, Location, NeedAction, Reward
 from users.models import User
 
 
 class LocationTest(APITestCase):
     """Тесты проверки локаций"""
+
     def setUp(self):
         # Создаем группы
-        self.moderator_group = Group.objects.create(name='Модераторы')
+        self.moderator_group = Group.objects.create(name="Модераторы")
 
         # Создаем пользователей и добавляем их в группы
-        self.user = User.objects.create_user(username='user', email='user@mail.ru', password='password')
-        self.moderator = User.objects.create_user(username='moderator', email='moderator@mail.ru', password='password')
+        self.user = User.objects.create_user(
+            username="user", email="user@mail.ru", password="password"
+        )
+        self.moderator = User.objects.create_user(
+            username="moderator", email="moderator@mail.ru", password="password"
+        )
         self.moderator_group.user_set.add(self.moderator)
 
         # Создаем курс и урок для тестирования
-        self.location = Location.objects.create(name='Дом', description='Test Description', owner=self.user)
+        self.location = Location.objects.create(
+            name="Дом", description="Test Description", owner=self.user
+        )
 
     def test_create_location(self):
         """Тест создания локации"""
         self.client.force_authenticate(user=self.user)
-        data = {
-            'name': 'Test',
-            'description': 'Test'
-        }
-        response = self.client.post(
-            '/locareward/locations/',
-            data=data
-        )
+        data = {"name": "Test", "description": "Test"}
+        response = self.client.post("/locareward/locations/", data=data)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED
-        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_location(self):
         """Тест обновления локации"""
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'name': 'U Test',
+            "name": "U Test",
         }
         response = self.client.patch(
-            f'/locareward/locations/{self.location.id}/',
-            data=data
+            f"/locareward/locations/{self.location.id}/", data=data
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_location(self):
         """Тест вывода списка локаций"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            '/locareward/locations/',
+            "/locareward/locations/",
         )
 
-        self.assertEqual(
-         response.status_code,
-         status.HTTP_200_OK
-     )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIsInstance(response.json(), dict)
 
-        self.assertIn('results', response.json())
-        self.assertIsInstance(response.json()['results'], list)
+        self.assertIn("results", response.json())
+        self.assertIsInstance(response.json()["results"], list)
 
-        results = response.json()['results']
+        results = response.json()["results"]
         self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
-        self.assertEqual(results[0]['name'], 'Дом')  # Проверяем название
+        self.assertEqual(results[0]["name"], "Дом")  # Проверяем название
 
     def test_retrieve_location(self):
         """Тест просмотра локации"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            f'/locareward/locations/{self.location.id}/',
+            f"/locareward/locations/{self.location.id}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_location(self):
         """Тест удаления локации"""
@@ -95,7 +84,7 @@ class LocationTest(APITestCase):
         self.assertIsNotNone(Location.objects.filter(id=self.location.id).first())
 
         response = self.client.delete(
-            f'/locareward/locations/{self.location.id}/',
+            f"/locareward/locations/{self.location.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -105,86 +94,74 @@ class LocationTest(APITestCase):
 
 class LikeActionTest(APITestCase):
     """Тесты проверки любимых действий"""
+
     def setUp(self):
         # Создаем группы
-        self.moderator_group = Group.objects.create(name='Модераторы')
+        self.moderator_group = Group.objects.create(name="Модераторы")
 
         # Создаем пользователей и добавляем их в группы
-        self.user = User.objects.create_user(username='user', email='user@mail.ru', password='password')
-        self.moderator = User.objects.create_user(username='moderator', email='moderator@mail.ru', password='password')
+        self.user = User.objects.create_user(
+            username="user", email="user@mail.ru", password="password"
+        )
+        self.moderator = User.objects.create_user(
+            username="moderator", email="moderator@mail.ru", password="password"
+        )
         self.moderator_group.user_set.add(self.moderator)
 
         # Создаем курс и урок для тестирования
-        self.action = LikeAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action = LikeAction.objects.create(
+            name="Бегать по утрам", description="Test Description", owner=self.user
+        )
 
     def test_create_like_action(self):
         """Тест создания любимого действия"""
         self.client.force_authenticate(user=self.user)
-        data = {
-            'name': 'Test',
-            'description': 'Test'
-        }
-        response = self.client.post(
-            '/locareward/likeactions/',
-            data=data
-        )
+        data = {"name": "Test", "description": "Test"}
+        response = self.client.post("/locareward/likeactions/", data=data)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED
-        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_like_action(self):
         """Тест обновления любимого действия"""
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'name': 'U Test',
+            "name": "U Test",
         }
         response = self.client.patch(
-            f'/locareward/likeactions/{self.action.id}/',
-            data=data
+            f"/locareward/likeactions/{self.action.id}/", data=data
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_like_action(self):
         """Тест вывода списка любимоых действий"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            '/locareward/likeactions/',
+            "/locareward/likeactions/",
         )
 
-        self.assertEqual(
-         response.status_code,
-         status.HTTP_200_OK
-     )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIsInstance(response.json(), dict)
 
-        self.assertIn('results', response.json())
-        self.assertIsInstance(response.json()['results'], list)
+        self.assertIn("results", response.json())
+        self.assertIsInstance(response.json()["results"], list)
 
-        results = response.json()['results']
+        results = response.json()["results"]
         self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
-        self.assertEqual(results[0]['name'], 'Бегать по утрам')  # Проверяем название
+        self.assertEqual(results[0]["name"], "Бегать по утрам")  # Проверяем название
 
     def test_retrieve_like_action(self):
         """Тест просмотра любимого действия"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            f'/locareward/likeactions/{self.action.id}/',
+            f"/locareward/likeactions/{self.action.id}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_like_action(self):
         """Тест удаления любимого действия"""
@@ -193,7 +170,7 @@ class LikeActionTest(APITestCase):
         self.assertIsNotNone(LikeAction.objects.filter(id=self.action.id).first())
 
         response = self.client.delete(
-            f'/locareward/likeactions/{self.action.id}/',
+            f"/locareward/likeactions/{self.action.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -203,86 +180,74 @@ class LikeActionTest(APITestCase):
 
 class NeedActionTest(APITestCase):
     """Тесты проверки нужных действия"""
+
     def setUp(self):
         # Создаем группы
-        self.moderator_group = Group.objects.create(name='Модераторы')
+        self.moderator_group = Group.objects.create(name="Модераторы")
 
         # Создаем пользователей и добавляем их в группы
-        self.user = User.objects.create_user(username='user', email='user@mail.ru', password='password')
-        self.moderator = User.objects.create_user(username='moderator', email='moderator@mail.ru', password='password')
+        self.user = User.objects.create_user(
+            username="user", email="user@mail.ru", password="password"
+        )
+        self.moderator = User.objects.create_user(
+            username="moderator", email="moderator@mail.ru", password="password"
+        )
         self.moderator_group.user_set.add(self.moderator)
 
         # Создаем курс и урок для тестирования
-        self.action = NeedAction.objects.create(name='Бегать по утрам', description='Test Description', owner=self.user)
+        self.action = NeedAction.objects.create(
+            name="Бегать по утрам", description="Test Description", owner=self.user
+        )
 
     def test_create_need_action(self):
         """Тест создания нужного действия"""
         self.client.force_authenticate(user=self.user)
-        data = {
-            'name': 'Test',
-            'description': 'Test'
-        }
-        response = self.client.post(
-            '/locareward/needactions/',
-            data=data
-        )
+        data = {"name": "Test", "description": "Test"}
+        response = self.client.post("/locareward/needactions/", data=data)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED
-        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_need_action(self):
         """Тест обновления нужного действия"""
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'name': 'U Test',
+            "name": "U Test",
         }
         response = self.client.patch(
-            f'/locareward/needactions/{self.action.id}/',
-            data=data
+            f"/locareward/needactions/{self.action.id}/", data=data
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_need_action(self):
         """Тест вывода списка нужных действий"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            '/locareward/needactions/',
+            "/locareward/needactions/",
         )
 
-        self.assertEqual(
-         response.status_code,
-         status.HTTP_200_OK
-     )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIsInstance(response.json(), dict)
 
-        self.assertIn('results', response.json())
-        self.assertIsInstance(response.json()['results'], list)
+        self.assertIn("results", response.json())
+        self.assertIsInstance(response.json()["results"], list)
 
-        results = response.json()['results']
+        results = response.json()["results"]
         self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
-        self.assertEqual(results[0]['name'], 'Бегать по утрам')  # Проверяем название
+        self.assertEqual(results[0]["name"], "Бегать по утрам")  # Проверяем название
 
     def test_retrieve_need_action(self):
         """Тест просмотра нужного действия"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            f'/locareward/needactions/{self.action.id}/',
+            f"/locareward/needactions/{self.action.id}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_need_action(self):
         """Тест удаления нужного действия"""
@@ -291,7 +256,7 @@ class NeedActionTest(APITestCase):
         self.assertIsNotNone(NeedAction.objects.filter(id=self.action.id).first())
 
         response = self.client.delete(
-            f'/locareward/needactions/{self.action.id}/',
+            f"/locareward/needactions/{self.action.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -301,86 +266,74 @@ class NeedActionTest(APITestCase):
 
 class RewardTest(APITestCase):
     """Тесты проверки вознаграждения"""
+
     def setUp(self):
         # Создаем группы
-        self.moderator_group = Group.objects.create(name='Модераторы')
+        self.moderator_group = Group.objects.create(name="Модераторы")
 
         # Создаем пользователей и добавляем их в группы
-        self.user = User.objects.create_user(username='user', email='user@mail.ru', password='password')
-        self.moderator = User.objects.create_user(username='moderator', email='moderator@mail.ru', password='password')
+        self.user = User.objects.create_user(
+            username="user", email="user@mail.ru", password="password"
+        )
+        self.moderator = User.objects.create_user(
+            username="moderator", email="moderator@mail.ru", password="password"
+        )
         self.moderator_group.user_set.add(self.moderator)
 
         # Создаем курс и урок для тестирования
-        self.reward = Reward.objects.create(name='Шоколад', description='Test Description', owner=self.user)
+        self.reward = Reward.objects.create(
+            name="Шоколад", description="Test Description", owner=self.user
+        )
 
     def test_create_reward(self):
         """Тест создания вознаграждения"""
         self.client.force_authenticate(user=self.user)
-        data = {
-            'name': 'Test',
-            'description': 'Test'
-        }
-        response = self.client.post(
-            '/locareward/rewards/',
-            data=data
-        )
+        data = {"name": "Test", "description": "Test"}
+        response = self.client.post("/locareward/rewards/", data=data)
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED
-        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_reward(self):
         """Тест обновления вознаграждения"""
         self.client.force_authenticate(user=self.user)
 
         data = {
-            'name': 'U Test',
+            "name": "U Test",
         }
         response = self.client.patch(
-            f'/locareward/rewards/{self.reward.id}/',
-            data=data
+            f"/locareward/rewards/{self.reward.id}/", data=data
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_reward(self):
         """Тест вывода списка вознаграждений"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            '/locareward/rewards/',
+            "/locareward/rewards/",
         )
 
-        self.assertEqual(
-         response.status_code,
-         status.HTTP_200_OK
-     )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIsInstance(response.json(), dict)
 
-        self.assertIn('results', response.json())
-        self.assertIsInstance(response.json()['results'], list)
+        self.assertIn("results", response.json())
+        self.assertIsInstance(response.json()["results"], list)
 
-        results = response.json()['results']
+        results = response.json()["results"]
         self.assertGreater(len(results), 0)  # Проверяем, что список не пуст
-        self.assertEqual(results[0]['name'], 'Шоколад')  # Проверяем название
+        self.assertEqual(results[0]["name"], "Шоколад")  # Проверяем название
 
     def test_retrieve_reward(self):
         """Тест просмотра вознаграждения"""
         self.client.force_authenticate(user=self.user)
 
         response = self.client.get(
-            f'/locareward/rewards/{self.reward.id}/',
+            f"/locareward/rewards/{self.reward.id}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_reward(self):
         """Тест удаления вознаграждения"""
@@ -389,7 +342,7 @@ class RewardTest(APITestCase):
         self.assertIsNotNone(Reward.objects.filter(id=self.reward.id).first())
 
         response = self.client.delete(
-            f'/locareward/rewards/{self.reward.id}/',
+            f"/locareward/rewards/{self.reward.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

@@ -168,8 +168,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULE = {
     'send-habit-reminders-every-minute': {
-        'task': 'habits.tasks.send_habit_reminder', # путь к вашей задаче
-        'schedule': 60.0, # каждые 60 секунд
+        'task': 'habits.tasks.send_habit_reminder',
+        'schedule': 60.0
     },
 }
 

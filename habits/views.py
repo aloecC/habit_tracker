@@ -1,24 +1,26 @@
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+
 from habits.models import HabitNice, HabitUseful
 from habits.paginators import HabitsPagination
 from habits.permisions import IsModerator, IsOwner
 from habits.serializers import HabitNiceSerializer, HabitUsefulSerializer
-from locareward.models import Location, Reward, NeedAction, LikeAction
+from locareward.models import LikeAction, Location, NeedAction, Reward
 from users.models import User
 
 
 class HabitUsefulCreateAPIView(generics.CreateAPIView):
     """Создание полезной привычки"""
+
     serializer_class = HabitUsefulSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        action_id = self.request.data.get('need_action')
+        action_id = self.request.data.get("need_action")
 
-        if self.request.data.get('reward'):
-            reward_id = self.request.data.get('reward')
+        if self.request.data.get("reward"):
+            reward_id = self.request.data.get("reward")
             try:
                 reward = Reward.objects.get(id=reward_id)
                 if reward.owner and reward.owner != self.request.user:
@@ -26,14 +28,16 @@ class HabitUsefulCreateAPIView(generics.CreateAPIView):
             except Reward.DoesNotExist:
                 raise PermissionDenied("Вознаграждение не найдено")
 
-        location_id = self.request.data.get('location')
+        location_id = self.request.data.get("location")
 
-        if self.request.data.get('nice_habit'):
-            nice_habit_id = self.request.data.get('nice_habit')
+        if self.request.data.get("nice_habit"):
+            nice_habit_id = self.request.data.get("nice_habit")
             try:
                 nice_habit = HabitNice.objects.get(id=nice_habit_id)
                 if nice_habit.user and nice_habit.user != self.request.user:
-                    raise PermissionDenied("Вы не можете добавлять чужие приятные привычки")
+                    raise PermissionDenied(
+                        "Вы не можете добавлять чужие приятные привычки"
+                    )
             except HabitNice.DoesNotExist:
                 raise PermissionDenied("Приятная привычка не найдена")
 
@@ -59,13 +63,17 @@ class HabitUsefulCreateAPIView(generics.CreateAPIView):
 
 class HabitUsefulRetrieveAPIView(generics.RetrieveAPIView):
     """Просмотр полезной привычки"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitNiceSerializer
     queryset = HabitUseful.objects.all()
 
     def get_object(self):
         obj = super().get_object()
-        if self.request.user.groups.filter(name='Модераторы').exists() or obj.user == self.request.user:
+        if (
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
+        ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
 
@@ -93,13 +101,17 @@ class HabitUsefulDestroyAPIView(generics.DestroyAPIView):
 
     def get_object(self):
         obj = super().get_object()
-        if self.request.user.groups.filter(name='Модераторы').exists() or obj.user == self.request.user:
+        if (
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
+        ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
 
 
 class HabitUsefulListAPIView(generics.ListAPIView):
     """Просмотр списка своих полезных привычек"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitUsefulSerializer
 
@@ -113,6 +125,7 @@ class HabitUsefulListAPIView(generics.ListAPIView):
 
 class HabitUsefulPublicListAPIView(generics.ListAPIView):
     """Просмотр списка публичных полезных привычек"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitUsefulSerializer
 
@@ -122,12 +135,13 @@ class HabitUsefulPublicListAPIView(generics.ListAPIView):
 
 class HabitNiceCreateAPIView(generics.CreateAPIView):
     """Создание приятной привычки"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitNiceSerializer
 
     def perform_create(self, serializer):
-        action_id = self.request.data.get('like_action')
-        location_id = self.request.data.get('location')
+        action_id = self.request.data.get("like_action")
+        location_id = self.request.data.get("location")
         try:
             action = LikeAction.objects.get(id=action_id)
 
@@ -150,19 +164,24 @@ class HabitNiceCreateAPIView(generics.CreateAPIView):
 
 class HabitNiceRetrieveAPIView(generics.RetrieveAPIView):
     """Просмотр приятной привычки"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitNiceSerializer
     queryset = HabitNice.objects.all()
 
     def get_object(self):
         obj = super().get_object()
-        if self.request.user.groups.filter(name='Модераторы').exists() or obj.user == self.request.user:
+        if (
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
+        ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
 
 
 class HabitNiceUpdateAPIView(generics.UpdateAPIView):
     """Обновление приятной привычки"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = HabitNiceSerializer
     queryset = HabitNice.objects.all()
@@ -176,18 +195,23 @@ class HabitNiceUpdateAPIView(generics.UpdateAPIView):
 
 class HabitNiceDestroyAPIView(generics.DestroyAPIView):
     """Удаление приятной привычки"""
+
     permission_classes = [IsAuthenticated]
     queryset = HabitNice.objects.all()
 
     def get_object(self):
         obj = super().get_object()
-        if self.request.user.groups.filter(name='Модераторы').exists() or obj.user == self.request.user:
+        if (
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
+        ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
 
 
 class HabitNiceListAPIView(generics.ListAPIView):
     """Просмотр списка приятных привычек"""
+
     serializer_class = HabitNiceSerializer
     pagination_class = HabitsPagination
     permission_classes = [IsAuthenticated]

@@ -14,7 +14,7 @@ class IsModerator(permissions.BasePermission):
 
 
 class IsOwner(permissions.BasePermission):
-    '''Разрешение на доступ владельцу'''
+    """Разрешение на доступ владельцу"""
 
     def has_permission(self, request, view):
         return request.user == view.get_object().owner

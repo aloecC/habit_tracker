@@ -1,14 +1,14 @@
 from django.contrib import admin
 
 from config import settings
-from locareward.models import NeedAction, LikeAction, Location, Reward
+from locareward.models import LikeAction, Location, NeedAction, Reward
 
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления локациями."""
 
-    list_display = ('id', "name", "description", "owner")
+    list_display = ("id", "name", "description", "owner")
     list_filter = ("name", "description", "owner")
     search_fields = ("name", "description", "owner")
     raw_id_fields = ("owner",)
@@ -18,7 +18,7 @@ class LocationAdmin(admin.ModelAdmin):
 class LikeActionAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления любимыми действиями."""
 
-    list_display = ('id', "name", "owner")
+    list_display = ("id", "name", "owner")
     list_filter = ("name", "owner")
     search_fields = ("name", "description", "owner")
     raw_id_fields = ("owner",)
@@ -28,7 +28,7 @@ class LikeActionAdmin(admin.ModelAdmin):
 class NeedActionAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления нужными действиями."""
 
-    list_display = ('id', "name", "owner")
+    list_display = ("id", "name", "owner")
     list_filter = ("name", "owner")
     search_fields = ("name", "description", "owner")
     raw_id_fields = ("owner",)
@@ -38,7 +38,7 @@ class NeedActionAdmin(admin.ModelAdmin):
 class RewardAdmin(admin.ModelAdmin):
     """Административный интерфейс для управления вознаграждениями."""
 
-    list_display = ('id', "name", "owner")
+    list_display = ("id", "name", "owner")
     list_filter = ("name", "owner")
     search_fields = ("name", "description", "owner")
     raw_id_fields = ("owner",)
