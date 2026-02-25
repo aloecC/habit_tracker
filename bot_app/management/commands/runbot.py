@@ -1097,14 +1097,14 @@ async def get_django_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                     )
                 ]
             )
-    keyboard.append(
-        [
-            InlineKeyboardButton(
-                "➕ Создать новую полезную привычку",
-                callback_data="create_useful_habit_start",
-            )
-        ]
-    )
+   # keyboard.append(
+    #    [
+    #        InlineKeyboardButton(
+     #           "➕ Создать новую полезную привычку",
+     #           callback_data="create_useful_habit_start",
+     #       )
+     #   ]
+    #)
 
     reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
