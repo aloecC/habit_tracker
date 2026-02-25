@@ -44,7 +44,9 @@ class HabitNice(HabitBaseInfo):
     is_pleasant = models.BooleanField(default=True, editable=False)
 
     def __str__(self):
-        return f"Приятная: {self.like_action.name} ({self.user.email})"
+        like_action_name = self.like_action.name if self.like_action else "Без действия"
+        #user_email = self.user.email if self.user else "Без пользователя"
+        return f"Приятная: {like_action_name}"
 
     class Meta:
         verbose_name = "Приятная привычка"
@@ -106,7 +108,9 @@ class HabitUseful(HabitBaseInfo):
         verbose_name_plural = "Полезные привычки"
 
     def __str__(self):
-        return f"Полезная: {self.need_action.name} ({self.user.email})"
+        need_action_name = self.need_action.name if self.need_action else "Без действия"
+        #user_email = self.user.email if self.user else "Без пользователя"
+        return f"Полезная: {need_action_name}"
 
     def save(self, *args, **kwargs):
         self.full_clean()

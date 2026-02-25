@@ -1,14 +1,13 @@
 import asyncio
 import html
 import logging
-
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 from telegram import Bot
 from telegram.error import TelegramError
-
 from .models import HabitUseful
+
 
 logger = logging.getLogger(__name__)
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
@@ -92,15 +91,12 @@ def send_habit_reminder(self):
                         f"[{now}] Напоминание в Telegram успешно отправлено для привычки ID: {habit.id}, Пользователю: {user.username} (Chat ID: {chat_id})"
                     )
 
-            except TelegramError as e:  # Ловим специфические ошибки Telegram
+            except TelegramError as e:
                 logger.error(
                     f"[{now}] Ошибка Telegram API для привычки ID: {habit.id}, Пользователь: {user.username}. Ошибка: {e}"
                 )
-                self.retry(
-                    exc=e
-                )  # Повторяем задачу, если это сетевая проблема или временная ошибка API
+                self.retry(exc=e)
             except Exception as e:
-                # Любая другая непредвиденная ошибка
                 logger.error(
                     f"[{now}] Непредвиденная ошибка при обработке привычки ID: {habit.id}. Ошибка: {e}",
                     exc_info=True,
@@ -112,3 +108,4 @@ def send_habit_reminder(self):
             f"[{now}] Глобальная ошибка в задаче send_habit_reminder: {e}",
             exc_info=True,
         )
+
