@@ -13,7 +13,6 @@ class HabitBaseInfo(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name="Создатель привычки",
-        default=1,
         related_name="%(class)s_habits",
     )
     location = models.ForeignKey(
