@@ -24,7 +24,7 @@ class Location(BaseInfo):
         verbose_name_plural = "Места"
 
     def __str__(self):
-        return self.name
+        return str(self.name) if self.name else "Без названия"
 
 
 class LikeAction(BaseInfo):
@@ -35,7 +35,7 @@ class LikeAction(BaseInfo):
         verbose_name_plural = "Любимые действия"
 
     def __str__(self):
-        return self.name
+        return str(self.name) if self.name else "Без названия"
 
 
 class NeedAction(BaseInfo):
@@ -46,7 +46,7 @@ class NeedAction(BaseInfo):
         verbose_name_plural = "Нужные действия"
 
     def __str__(self):
-        return self.name
+        return str(self.name) if self.name else "Без названия"
 
 
 class Reward(BaseInfo):
@@ -57,4 +57,4 @@ class Reward(BaseInfo):
         verbose_name_plural = "Вознаграждения"
 
     def __str__(self):
-        return self.name
+        return str(self.name) if self.name else "Без названия"

@@ -30,6 +30,7 @@ black = "^26.1.0"
 mypy = "^1.19.1"
 isort = "^7.0.0"
 python-telegram-bot = "^22.6"
+docformatter = "^1.7.7"
 
 
 [build-system]
