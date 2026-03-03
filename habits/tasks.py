@@ -5,12 +5,25 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 from telegram import Bot
+from telegram.constants import ParseMode
 from telegram.error import TelegramError
 from .models import HabitUseful
 
 
 logger = logging.getLogger(__name__)
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
+
+
+async def send_telegram_msg(token, chat_id, message):
+    """Вспомогательная асинхронная функция"""
+    bot = Bot(token=token)
+    # Используем 'async with', чтобы бот корректно открыл и закрыл соединение
+    async with bot:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=message,
+            parse_mode=ParseMode.HTML
+        )
 
 
 @shared_task(bind=True, default_retry_delay=300, max_retries=5)
@@ -82,10 +95,10 @@ def send_habit_reminder(self):
                     message = "\n".join(message_parts)
 
                     # Отправка сообщения через Telegram Bot API
-                    asyncio.run(bot.send_message(
+                    asyncio.run(send_telegram_msg(
+                        token=settings.TELEGRAM_BOT_TOKEN,
                         chat_id=chat_id,
-                        text=message,
-                        parse_mode='HTML'
+                        message=message
                     ))
                     logger.info(
                         f"[{now}] Напоминание в Telegram успешно отправлено для привычки ID: {habit.id}, Пользователю: {user.username} (Chat ID: {chat_id})"
