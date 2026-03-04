@@ -58,21 +58,20 @@ class HabitUsefulCreateAPIView(generics.CreateAPIView):
         except Location.DoesNotExist:
             raise PermissionDenied("Локация не найдена")
 
-        habituseful = serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user)
 
 
 class HabitUsefulRetrieveAPIView(generics.RetrieveAPIView):
     """Просмотр полезной привычки"""
 
     permission_classes = [IsAuthenticated]
-    serializer_class = HabitNiceSerializer
+    serializer_class = HabitUsefulSerializer
     queryset = HabitUseful.objects.all()
 
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists()
-            or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -102,8 +101,7 @@ class HabitUsefulDestroyAPIView(generics.DestroyAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists()
-            or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -172,8 +170,7 @@ class HabitNiceRetrieveAPIView(generics.RetrieveAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists()
-            or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -202,8 +199,7 @@ class HabitNiceDestroyAPIView(generics.DestroyAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists()
-            or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
