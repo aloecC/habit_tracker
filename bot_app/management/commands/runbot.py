@@ -22,26 +22,70 @@ from telegram.ext import (
     filters,
 )
 
-from bot_app.views import MENU, CREATE_REWARD_DESCRIPTION, cancel, create_reward_description, logger, start, \
-    check_user_and_call_next, get_django_habits, create_like_action_start, create_need_action_start, \
-    create_location_start, create_reward_start, VIEW_HABITS, CREATE_LIKE_ACTION_NAME, CREATE_LIKE_ACTION_DESCRIPTION, \
-    CREATE_NEED_ACTION_NAME, create_like_action_description, create_like_action_name, create_need_action_name, \
-    create_need_action_description, CREATE_NEED_ACTION_DESCRIPTION, create_location_name, CREATE_LOCATION_NAME, \
-    CREATE_REWARD_NAME, create_reward_name, create_nice_habit_start, CREATE_NICE_HABIT_SELECT_LIKE_ACTION, \
-    create_nice_habit_select_like_action, CREATE_NICE_HABIT_NEW_LIKE_ACTION_NAME, \
-    create_nice_habit_new_like_action_name, CREATE_NICE_HABIT_NEW_LIKE_ACTION_DESCRIPTION, \
-    create_nice_habit_new_like_action_description, CREATE_NICE_HABIT_SELECT_LOCATION, create_nice_habit_select_location, \
-    CREATE_LOCATION_DESCRIPTION, create_location_description, create_useful_habit_start, \
-    CREATE_USEFUL_HABIT_SELECT_NEED_ACTION, create_useful_habit_select_need_action, \
-    CREATE_USEFUL_HABIT_NEW_NEED_ACTION_NAME, create_useful_habit_new_need_action_name, \
-    CREATE_USEFUL_HABIT_NEW_NEED_ACTION_DESCRIPTION, create_useful_habit_new_need_action_description, \
-    CREATE_USEFUL_HABIT_SELECT_LOCATION, create_useful_habit_select_location, create_useful_habit_select_location_skip, \
-    CREATE_USEFUL_HABIT_SELECT_TIME, CREATE_USEFUL_HABIT_SELECT_PERIODICITY, create_useful_habit_select_time, \
-    create_useful_habit_select_periodicity, CREATE_USEFUL_HABIT_SELECT_REWARD_OR_NICE_HABIT, \
-    create_useful_habit_select_reward_or_nice_habit, CREATE_USEFUL_HABIT_SELECT_REWARD, \
-    create_useful_habit_select_reward, CREATE_USEFUL_HABIT_SELECT_NICE_HABIT, create_useful_habit_select_nice_habit, \
-    CREATE_USEFUL_HABIT_IS_PUBLIC, save_useful_habit, main_menu, create_stuff_handler, create_nice_habit_conv_handler, \
-    create_useful_habit_conv_handler
+from bot_app.views import (
+    MENU,
+    CREATE_REWARD_DESCRIPTION,
+    cancel,
+    create_reward_description,
+    logger,
+    start,
+    check_user_and_call_next,
+    get_django_habits,
+    create_like_action_start,
+    create_need_action_start,
+    create_location_start,
+    create_reward_start,
+    VIEW_HABITS,
+    CREATE_LIKE_ACTION_NAME,
+    CREATE_LIKE_ACTION_DESCRIPTION,
+    CREATE_NEED_ACTION_NAME,
+    create_like_action_description,
+    create_like_action_name,
+    create_need_action_name,
+    create_need_action_description,
+    CREATE_NEED_ACTION_DESCRIPTION,
+    create_location_name,
+    CREATE_LOCATION_NAME,
+    CREATE_REWARD_NAME,
+    create_reward_name,
+    create_nice_habit_start,
+    CREATE_NICE_HABIT_SELECT_LIKE_ACTION,
+    create_nice_habit_select_like_action,
+    CREATE_NICE_HABIT_NEW_LIKE_ACTION_NAME,
+    create_nice_habit_new_like_action_name,
+    CREATE_NICE_HABIT_NEW_LIKE_ACTION_DESCRIPTION,
+    create_nice_habit_new_like_action_description,
+    CREATE_NICE_HABIT_SELECT_LOCATION,
+    create_nice_habit_select_location,
+    CREATE_LOCATION_DESCRIPTION,
+    create_location_description,
+    create_useful_habit_start,
+    CREATE_USEFUL_HABIT_SELECT_NEED_ACTION,
+    create_useful_habit_select_need_action,
+    CREATE_USEFUL_HABIT_NEW_NEED_ACTION_NAME,
+    create_useful_habit_new_need_action_name,
+    CREATE_USEFUL_HABIT_NEW_NEED_ACTION_DESCRIPTION,
+    create_useful_habit_new_need_action_description,
+    CREATE_USEFUL_HABIT_SELECT_LOCATION,
+    create_useful_habit_select_location,
+    create_useful_habit_select_location_skip,
+    CREATE_USEFUL_HABIT_SELECT_TIME,
+    CREATE_USEFUL_HABIT_SELECT_PERIODICITY,
+    create_useful_habit_select_time,
+    create_useful_habit_select_periodicity,
+    CREATE_USEFUL_HABIT_SELECT_REWARD_OR_NICE_HABIT,
+    create_useful_habit_select_reward_or_nice_habit,
+    CREATE_USEFUL_HABIT_SELECT_REWARD,
+    create_useful_habit_select_reward,
+    CREATE_USEFUL_HABIT_SELECT_NICE_HABIT,
+    create_useful_habit_select_nice_habit,
+    CREATE_USEFUL_HABIT_IS_PUBLIC,
+    save_useful_habit,
+    main_menu,
+    create_stuff_handler,
+    create_nice_habit_conv_handler,
+    create_useful_habit_conv_handler,
+)
 
 
 class Command(BaseCommand):
@@ -70,4 +114,3 @@ class Command(BaseCommand):
         logger.info("Telegram бот запущен.")
         application.run_polling(allowed_updates=Update.ALL_TYPES)
         logger.info("Telegram бот остановлен.")
-

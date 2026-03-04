@@ -213,7 +213,7 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
-            'celery_file': {
+        'celery_file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'celery.log'),
@@ -235,9 +235,9 @@ LOGGING = {
         },
 
         'habits.tasks': {  # логгер для  Celery задач
-        'handlers': ['console', 'celery_file'],
-        'level': 'INFO',
-        'propagate': False,
+            'handlers': ['console', 'celery_file'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }

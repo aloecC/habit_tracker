@@ -1,13 +1,14 @@
-  .env
-  __pycache__/
-  *.pyc
-  *.sqlite3
-  .pytest_cache/
-  .mypy_cache/
-  .ruff_cache/
-  venv/
-  .vscode/
-  db.sqlite3
-  /media/
-  /static/
-  *.log
+.env
+.idea
+.idea/
+__pycache__/
+*.pyc
+*.sqlite3
+.pytest_cache/
+.ruff_cache/
+venv/
+.vscode/
+db.sqlite3
+/media/
+/static/
+*.log

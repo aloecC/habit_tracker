@@ -39,7 +39,6 @@ from habits.models import (
 User = get_user_model()
 logger = logging.getLogger("bot_app")
 
-
 (
     MENU,
     CREATE_LIKE_ACTION_NAME,
@@ -68,17 +67,16 @@ logger = logging.getLogger("bot_app")
     CREATE_USEFUL_HABIT_SELECT_REWARD,
     CREATE_USEFUL_HABIT_SELECT_NICE_HABIT,
     CREATE_USEFUL_HABIT_IS_PUBLIC,
-    VIEW_HABITS
+    VIEW_HABITS, VIEW_PUBLIC_HABITS,
 ) = range(
-    28
-)  # Увеличиваем диапазон
+    29
+)
 
-# Хелперы для клавиатур
 MAIN_MENU_KEYBOARD = [
     ["➕ Добавить любимое действие", "➕ Добавить нужное действие"],
     ["➕ Добавить локацию", "➕ Добавить награду"],
     ["✨ Создать приятную привычку", "📝 Создать полезную привычку"],
-    ["📊 Мои привычки", "⚙️ Настройки"],
+    ["📊 Мои привычки", "🔓 Публичные привычки"],
 ]
 
 PERIODICITY_KEYBOARD = [
@@ -89,7 +87,6 @@ PERIODICITY_KEYBOARD = [
 PUBLIC_CHOICE_KEYBOARD = [["Да", "Нет"]]
 
 
-# Общие хелперы
 async def get_django_user_and_update_chat_id(telegram_user, chat_id):
     """Получает или создает пользователя Django и обновляет chat_id."""
     user, created = await User.objects.aget_or_create(
@@ -193,10 +190,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return MENU
 
-
-# Создание LikeAction, NeedAction, Location, Reward
-
-
 # LikeAction
 async def create_like_action_start(
     update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -216,11 +209,15 @@ async def create_like_action_name(
     like_actions = await sync_to_async(
         lambda: LikeAction.objects.filter(name=action_name, owner=django_user).exists()
     )()
+
     if like_actions:
         await update.message.reply_text(
-            f"Любимое действие с названием '{action_name}' уже существует. Введите другое название."
+            "О, я знаю это действие! Мы его уже сохраняли!",
+            reply_markup=ReplyKeyboardMarkup(
+                MAIN_MENU_KEYBOARD, resize_keyboard=True, one_time_keyboard=False
+            ),
         )
-        return CREATE_LIKE_ACTION_NAME
+        return MENU
     context.user_data["new_like_action_name"] = action_name
     await update.message.reply_text(
         "Введите описание действия (необязательно, можно пропустить, введите '-'):"
@@ -270,12 +267,18 @@ async def create_need_action_name(
     need_actions = await sync_to_async(
         lambda: NeedAction.objects.filter(name=action_name, owner=django_user).exists()
     )()
+
     if need_actions:
         await update.message.reply_text(
-            f"Нужное действие с названием '{action_name}' уже существует. Введите другое название."
+            "О, я знаю это действие! Мы его уже сохраняли!",
+            reply_markup=ReplyKeyboardMarkup(
+                MAIN_MENU_KEYBOARD, resize_keyboard=True, one_time_keyboard=False
+            ),
         )
-        return CREATE_NEED_ACTION_NAME
+        return MENU
+
     context.user_data["new_need_action_name"] = action_name
+
     await update.message.reply_text(
         "Введите описание действия (необязательно, можно пропустить, введите '-'):"
     )
@@ -291,7 +294,7 @@ async def create_need_action_description(
     django_user = context.user_data["django_user"]
     action_name = context.user_data["new_need_action_name"]
 
-    await sync_to_async(transaction.atomic)()  # Начинаем транзакцию асинхронно
+    await sync_to_async(transaction.atomic)()
     await sync_to_async(NeedAction.objects.create)(
         name=action_name, description=action_description, owner=django_user
     )
@@ -324,11 +327,15 @@ async def create_location_name(
     locations = await sync_to_async(
         lambda: Location.objects.filter(name=location_name, owner=django_user).exists()
     )()
+
     if locations:
         await update.message.reply_text(
-            f"Локация с названием '{location_name}' уже существует. Введите другое название."
+            "О, я знаю эту локацию! Мы ее уже сохраняли!",
+            reply_markup=ReplyKeyboardMarkup(
+                MAIN_MENU_KEYBOARD, resize_keyboard=True, one_time_keyboard=False
+            ),
         )
-        return CREATE_LOCATION_NAME
+        return MENU
     context.user_data["new_location_name"] = location_name
     await update.message.reply_text(
         "Введите описание локации (необязательно, можно пропустить, введите '-'):"
@@ -351,19 +358,15 @@ async def create_location_description(
     )
 
     await update.message.reply_text(
-        f"Локация '{location_name}' успешно создана!",
-        reply_markup=ReplyKeyboardMarkup(
-            MAIN_MENU_KEYBOARD, resize_keyboard=True, one_time_keyboard=False
-        ),
+        f"Локация '{location_name}' успешно создана!"
     )
-    return MENU
 
-    # with transaction.atomic():
-    #    await Location.objects.acreate(name=location_name, description=location_description, owner=django_user)
-    # await update.message.reply_text(f"Локация '{location_name}' успешно создана!",
-    #                                reply_markup=ReplyKeyboardMarkup(MAIN_MENU_KEYBOARD, resize_keyboard=True,
-    #                                                                one_time_keyboard=False))
-    # return MENU
+    caller_state = context.user_data.get("caller_state")
+    if caller_state == CREATE_NICE_HABIT_SELECT_LOCATION:
+        context.user_data.pop("caller_state", None)
+        return CREATE_NICE_HABIT_SELECT_LOCATION
+    else:
+        return MENU
 
 
 # Reward
@@ -386,9 +389,12 @@ async def create_reward_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )()
     if rewards:
         await update.message.reply_text(
-            f"Вознаграждение с названием '{reward_name}' уже существует. Введите другое название"
+            "О, я знаю это вознаграждение! Мы его уже сохраняли!",
+            reply_markup=ReplyKeyboardMarkup(
+                MAIN_MENU_KEYBOARD, resize_keyboard=True, one_time_keyboard=False
+            ),
         )
-        return CREATE_REWARD_NAME
+        return MENU
     context.user_data["new_reward_name"] = reward_name
     await update.message.reply_text(
         "Введите описание вознаграждения (необязательно, можно пропустить, введите '-':"
@@ -476,6 +482,9 @@ async def create_nice_habit_select_like_action(
 async def create_nice_habit_new_like_action_name(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    query = update.callback_query
+    await query.answer()
+
     action_name = update.message.text
     django_user = context.user_data["django_user"]
     like_action_exists = await sync_to_async(
@@ -483,10 +492,11 @@ async def create_nice_habit_new_like_action_name(
     )()
 
     if like_action_exists:
-        await update.message.reply_text(
-            f"Любимое действие с названием '{action_name}' уже существует. Введите другое название."
-        )
-        return CREATE_NICE_HABIT_NEW_LIKE_ACTION_NAME
+        await update.message.reply_text("О, я знаю это действие! Мы его уже сохраняли!")
+        like_action_id = int(query.data.split("_")[3])
+        context.user_data["nice_habit_like_action_id"] = like_action_id
+        return await create_nice_habit_select_location_prompt(update, context)
+
     context.user_data["new_nice_habit_like_action_name"] = action_name
     await update.message.reply_text(
         "Введите описание для нового любимого действия (необязательно, можно пропустить, введите '-'):"
@@ -778,8 +788,7 @@ async def create_useful_habit_select_location(
         context.user_data["caller_state"] = (
             CREATE_USEFUL_HABIT_SELECT_LOCATION  # Чтобы знать куда вернуться
         )
-    return CREATE_LOCATION_NAME
-
+        return CREATE_LOCATION_NAME
     else:
         location_id = int(query.data.split("_")[2])
         context.user_data["useful_habit_location_id"] = location_id
@@ -1098,25 +1107,57 @@ async def get_django_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                     )
                 ]
             )
-   # keyboard.append(
-    #    [
-    #        InlineKeyboardButton(
-     #           "➕ Создать новую полезную привычку",
-     #           callback_data="create_useful_habit_start",
-     #       )
-     #   ]
-    #)
 
     reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
     await update.message.reply_text(
-        "Чтобы выйти нажмите '-'):",
+        "Полезные привычки",
         reply_markup=reply_markup,
     )
 
     if not need_habits:
         await update.message.reply_text(
             "У вас пока нет полезных привычек. Сначала создайте их."
+        )
+        return MENU
+    return MENU
+
+
+async def get_django_public_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Получает публичные полезные привычки"""
+    django_user = context.user_data["django_user"]
+    need_habits = await sync_to_async(
+        lambda: list(
+            HabitUseful.objects.filter(is_public=True).select_related("need_action")
+        )
+    )()
+
+    keyboard = []
+    if need_habits:
+        for nh in need_habits:
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        (
+                            nh.need_action.name
+                            if nh.need_action
+                            else f"Полезная привычка ID:{nh.id}"
+                        ),
+                        callback_data="-", #реализовать установку себе чужой привычки
+                    )
+                ]
+            )
+
+    reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
+
+    await update.message.reply_text(
+        'Публичные привычки',
+        reply_markup=reply_markup,
+    )
+
+    if not need_habits:
+        await update.message.reply_text(
+            "Тут пока ничего нет! Можете стать первым!"
         )
         return MENU
     return MENU
@@ -1132,9 +1173,15 @@ async def create_useful_habit_select_location_skip(
     return CREATE_USEFUL_HABIT_SELECT_TIME
 
 
-# --- Conversation Handler для создания Action, Location, Reward и просмотра HabitNice---
+# Conversation Handler для создания Action, Location, Reward и просмотра HabitNice
 create_stuff_handler = ConversationHandler(
     entry_points=[
+        MessageHandler(
+            filters.Regex(r"^🔓 Публичные привычки$"),
+            lambda u, c: check_user_and_call_next(
+                u, c, get_django_public_habits,
+            ),
+        ),
         MessageHandler(
             filters.Regex(r"^📊 Мои привычки$"),
             lambda u, c: check_user_and_call_next(
@@ -1165,6 +1212,9 @@ create_stuff_handler = ConversationHandler(
     states={
         VIEW_HABITS: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, get_django_habits)
+        ],
+        VIEW_PUBLIC_HABITS: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, get_django_public_habits)
         ],
         CREATE_LIKE_ACTION_NAME: [
             MessageHandler(
@@ -1209,7 +1259,7 @@ create_stuff_handler = ConversationHandler(
     map_to_parent={MENU: MENU},
 )
 
-# --- Conversation Handler для создания приятной привычки (HabitNice) ---
+# Conversation Handler для создания приятной привычки (HabitNice)
 create_nice_habit_conv_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
@@ -1271,7 +1321,7 @@ create_nice_habit_conv_handler = ConversationHandler(
     map_to_parent={MENU: MENU},
 )
 
-# --- Conversation Handler для создания полезной привычки (HabitUseful) ---
+# Conversation Handler для создания полезной привычки (HabitUseful)
 create_useful_habit_conv_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
@@ -1396,3 +1446,4 @@ create_useful_habit_conv_handler = ConversationHandler(
     fallbacks=[CommandHandler("cancel", cancel)],
     map_to_parent={MENU: MENU},
 )
+
