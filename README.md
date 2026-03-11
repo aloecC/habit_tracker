@@ -62,6 +62,21 @@ docker-compose:
   Проверьте админку: http://localhost:8000/admin/.
 8. docker compose logs worker # Проверит Celery Worker
 
+```
+
+ Настройка CI/CD
+Для автоматического деплоя в GitHub Secrets добавлены:
+- SERVER_HOST: IP сервера в Yandex Cloud.
+- SERVER_USER: Пользователь.
+- SSH_PRIVATE_KEY: Приватный SSH ключ.
+
+При каждом пуше в master:
+1. Проверяется стиль кода (flake8).
+2. Запускаются тесты.
+3. Собирается Docker-образ.
+4. Выполняется автоматический деплой на сервер.
+
+```
 
 📐 Архитектура базы данных
 
