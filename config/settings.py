@@ -142,6 +142,9 @@ USE_TZ = True  # Поддержка временных зон
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"  # Маршрут для доступа к статике
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]  # Список директорий на диске из которых подгружаются статические файлы
