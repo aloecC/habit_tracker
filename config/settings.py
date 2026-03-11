@@ -143,11 +143,11 @@ USE_TZ = True  # Поддержка временных зон
 
 STATIC_URL = "static/"  # Маршрут для доступа к статике
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "static"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]  # Список директорий на диске из которых подгружаются статические файлы
+#STATICFILES_DIRS = [
+#    BASE_DIR / "static"
+#]  # Список директорий на диске из которых подгружаются статические файлы
 
 MEDIA_URL = "/media/"  # Маршрут для доступа к медиа-файлам
 MEDIA_ROOT = BASE_DIR / "media"
