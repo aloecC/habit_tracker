@@ -43,12 +43,12 @@ EverBusy Habit Tracker — это продвинутый Telegram-бот на б
 4. Примените миграции
 5. Создайте суперпользователя (для доступа к админке)
 
-||| Шаги для запуска проекта через 
+🏃 Шаги для запуска проекта через
 docker-compose:
 1. Копирование Dockerfile и Docker-compose.yml
 2. Настройка файла .env (Конфиденциальность)
 3. Проверка файлов исключений .gitignore и .dockerignore
-Первый запуск 
+Первый запуск
 1. docker compose down -v # Остановит и удалит все контейнеры, сети, и ТОМЫ (postgres_data, media)
 2. docker compose up -d --build # Запустит все сервисы и соберет образы
 *  -d: Запустить в фоновом режиме.
@@ -61,16 +61,6 @@ docker-compose:
   Откройте браузер и перейдите на http://localhost:8000/. Должна открыться страница Django.
   Проверьте админку: http://localhost:8000/admin/.
 8. docker compose logs worker # Проверит Celery Worker
-
-
-🏃 Запуск проекта
-
-Для полной работы системы необходимо запустить 4 процесса в разных терминалах:
-
-1. Redis (redis-server)
-2. Celery Worker(celery -A config worker -l INFO -P eventlet)
-3. Celery Beat(celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler)
-4. Telegram Bot(python manage.py runbot)
 
 
 📐 Архитектура базы данных

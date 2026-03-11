@@ -8,7 +8,9 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     city = models.CharField(max_length=15, blank=True, null=True)
 
-    telegram_chat_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="Telegram Chat ID")
+    telegram_chat_id = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Telegram Chat ID"
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = [

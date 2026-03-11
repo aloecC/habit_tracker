@@ -1,12 +1,8 @@
 from rest_framework.routers import DefaultRouter
 
 from locareward.apps import LocarewardConfig
-from locareward.views import (
-    LikeActionViewSet,
-    LocationViewSet,
-    NeedActionViewSet,
-    RewardViewSet,
-)
+from locareward.views import (LikeActionViewSet, LocationViewSet,
+                              NeedActionViewSet, RewardViewSet)
 
 app_name = LocarewardConfig.name
 

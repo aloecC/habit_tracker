@@ -71,7 +71,8 @@ class HabitUsefulRetrieveAPIView(generics.RetrieveAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -101,7 +102,8 @@ class HabitUsefulDestroyAPIView(generics.DestroyAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -170,7 +172,8 @@ class HabitNiceRetrieveAPIView(generics.RetrieveAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")
@@ -199,7 +202,8 @@ class HabitNiceDestroyAPIView(generics.DestroyAPIView):
     def get_object(self):
         obj = super().get_object()
         if (
-            self.request.user.groups.filter(name="Модераторы").exists() or obj.user == self.request.user
+            self.request.user.groups.filter(name="Модераторы").exists()
+            or obj.user == self.request.user
         ):
             return obj
         raise PermissionDenied("У вас нет доступа к этому объекту.")

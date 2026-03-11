@@ -1,7 +1,7 @@
-import pytest
 import os
 
-from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler
+import pytest
+from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
 
 # Настройки Django для тестов
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
@@ -51,8 +51,9 @@ class MockLocation:
 @pytest.fixture
 def django_user(db):
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
-    return User.objects.create_user(username='testuser', password='password')
+    return User.objects.create_user(username="testuser", password="password")
 
 
 class MockTelegramUser:
@@ -106,7 +107,13 @@ def mock_context(mock_telegram_user, mock_chat_id):
 
 # Fixture для симуляции Update объекта
 class MockUpdate:
-    def __init__(self, message=None, callback_query=None, effective_user=None, effective_message=None):
+    def __init__(
+        self,
+        message=None,
+        callback_query=None,
+        effective_user=None,
+        effective_message=None,
+    ):
         self.message = message
         self.callback_query = callback_query
         self.effective_user = effective_user
@@ -123,7 +130,9 @@ class MockMessage:
 
     async def reply_text(self, text, reply_markup=None, parse_mode=None):
         print(f"[MockReply] {text}")  # Simulate sending a message
-        return MockMessage(chat_id=self.chat_id, text=text)  # Simulate returned message object
+        return MockMessage(
+            chat_id=self.chat_id, text=text
+        )  # Simulate returned message object
 
 
 class MockCallbackQuery:
@@ -145,20 +154,32 @@ class MockCallbackQuery:
 
 @pytest.fixture
 def mock_update(mock_telegram_user, mock_chat_id):
-    message = MockMessage(chat_id=mock_chat_id, from_user=mock_telegram_user, text="Some text")
-    return MockUpdate(message=message, effective_user=mock_telegram_user, effective_message=message)
+    message = MockMessage(
+        chat_id=mock_chat_id, from_user=mock_telegram_user, text="Some text"
+    )
+    return MockUpdate(
+        message=message, effective_user=mock_telegram_user, effective_message=message
+    )
 
 
 @pytest.fixture
 def mock_callback_query(mock_telegram_user, mock_chat_id):
     message = MockMessage(chat_id=mock_chat_id, from_user=mock_telegram_user)
-    callback_query = MockCallbackQuery(data="test_data", from_user=mock_telegram_user, message=message,
-                                       chat_id=mock_chat_id)
-    return MockUpdate(callback_query=callback_query, effective_user=mock_telegram_user, effective_message=message)
+    callback_query = MockCallbackQuery(
+        data="test_data",
+        from_user=mock_telegram_user,
+        message=message,
+        chat_id=mock_chat_id,
+    )
+    return MockUpdate(
+        callback_query=callback_query,
+        effective_user=mock_telegram_user,
+        effective_message=message,
+    )
 
 
 async def call_handler(handler, update, context):
-    if hasattr(handler, 'handle_update'):
+    if hasattr(handler, "handle_update"):
         return await handler.handle_update(None, update, context)
     elif isinstance(handler, CommandHandler):
         return await handler.callback(update, context)
@@ -170,7 +191,10 @@ async def call_handler(handler, update, context):
         return await handler(update, context)
 
 
-from bot_app.views import create_useful_habit_conv_handler, create_nice_habit_conv_handler, create_stuff_handler, start
+from bot_app.views import (create_nice_habit_conv_handler,
+                           create_stuff_handler,
+                           create_useful_habit_conv_handler, start)
+
 
 @pytest.fixture
 def test_app():
@@ -179,4 +203,5 @@ def test_app():
         "create_useful_habit_conv_handler": create_useful_habit_conv_handler,
         "create_nice_habit_conv_handler": create_nice_habit_conv_handler,
         "create_stuff_handler": create_stuff_handler,
-        "start_handler": CommandHandler("start", start)     }
+        "start_handler": CommandHandler("start", start),
+    }
