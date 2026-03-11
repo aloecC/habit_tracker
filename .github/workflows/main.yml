@@ -1,0 +1,176 @@
+name: Django CI/CD
+
+on:
+    push:
+        branches: [ "main", "develop", "master"]
+    pull_request:
+        branches: [ "main", "develop"]
+
+jobs:
+
+    linting:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.13"
+
+            -   name: Install Linting Tools
+                run: |
+                    pip install flake8 black isort
+
+            -   name: Run Black check
+                run: black .
+
+            -   name: Run Isort check
+                run: isort .
+
+            -   name: Run Flake8
+                run: flake8 .
+
+
+    tests:
+        runs-on: ubuntu-latest
+        needs: linting
+
+
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_USER: user
+                    POSTGRES_PASSWORD: password
+                    POSTGRES_DB: test_db
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+            redis:
+                image: redis:7
+                ports:
+                    - 6379:6379
+
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.13"
+
+            -   name: Install Dependencies
+                run: |
+                    python -m pip install --upgrade pip
+                    pip install poetry
+                    poetry install
+
+            -   name: Run Migrations
+                env:
+                    POSTGRES_DB: test_db
+                    POSTGRES_USER: user
+                    POSTGRES_PASSWORD: password
+                    POSTGRES_HOST: 127.0.0.1
+                    POSTGRES_PORT: 5432
+                    SECRET_KEY: temporary-secret-key
+                run: |
+                    poetry run python manage.py migrate
+
+            -   name: Run Tests
+                env:
+                    POSTGRES_DB: test_db
+                    POSTGRES_USER: user
+                    POSTGRES_PASSWORD: password
+                    POSTGRES_HOST: 127.0.0.1
+                    POSTGRES_PORT: 5432
+                    REDIS_URL: redis://localhost:6379/0
+                    SECRET_KEY: temporary-secret-key
+                run: |
+                    poetry run python manage.py test
+
+    docker-build:
+        runs-on: ubuntu-latest
+        needs: tests
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Build Docker Image
+                run: docker build . --file Dockerfile
+
+    deploy:
+        runs-on: ubuntu-latest
+        needs: docker-build
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Deploy via SSH
+                uses: appleboy/ssh-action@master
+                with:
+                    host: ${{ secrets.SERVER_HOST }}
+                    username: ${{ secrets.SERVER_USER }}
+                    key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    script: |
+
+                        mkdir -p ~/habit_tracker
+                        cd ~/habit_tracker
+
+
+                        if [ ! -d ".git" ]; then
+                          git init
+                          git remote add origin https://github.com/${{ github.repository }}.git
+                        fi
+                        git fetch --all
+                        git checkout -f master || git checkout -f main
+                        git pull origin master || git pull origin main
+
+                        if [ ! -f ".env" ]; then
+                          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+                          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+                          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+                          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+                          echo "ALLOWED_HOSTS=158.160.28.109,localhost,127.0.0.1" >> .env
+                          echo "DEBUG=False" >> .env
+
+                        fi
+
+
+                        docker build . --file Dockerfile --tag habit_tracker_bot:latest
+
+
+                        docker stop habit_tracker_db || true
+                        docker rm habit_tracker_db || true
+                        docker stop habit_tracker_redis || true
+                        docker rm habit_tracker_redis || true
+                        docker stop habit_tracker_app || true
+                        docker rm habit_tracker_app || true
+
+
+                        docker run -d --name habit_tracker_db \
+                          -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+                          -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+                          -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+                          -v postgres_data:/var/lib/postgresql/data \
+                          postgres:17
+
+                        docker run -d --name habit_tracker_redis \
+                          -p 6379:6379 \
+                          redis:alpine
+
+                        sleep 10
+
+                        docker run -d --name habit_tracker_app \
+                          -p 8000:8000 \
+                          --env-file .env \
+                          -v $(pwd):/app \
+                          -v media:/app/media \
+                          habit_tracker_bot:latest
+
+                        sleep 5
+                        docker exec habit_tracker_app python manage.py migrate
+                        docker exec habit_tracker_app python manage.py collectstatic --noinput

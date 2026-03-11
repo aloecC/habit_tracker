@@ -9,32 +9,15 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
 from telegram.error import TelegramError
-from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ContextTypes, ConversationHandler, MessageHandler,
+                          filters)
 
-from habits.models import (
-    HabitNice,
-    HabitUseful,
-    LikeAction,
-    Location,
-    NeedAction,
-    Reward,
-)
+from habits.models import (HabitNice, HabitUseful, LikeAction, Location,
+                           NeedAction, Reward)
 
 User = get_user_model()
 logger = logging.getLogger("bot_app")
@@ -67,10 +50,9 @@ logger = logging.getLogger("bot_app")
     CREATE_USEFUL_HABIT_SELECT_REWARD,
     CREATE_USEFUL_HABIT_SELECT_NICE_HABIT,
     CREATE_USEFUL_HABIT_IS_PUBLIC,
-    VIEW_HABITS, VIEW_PUBLIC_HABITS,
-) = range(
-    29
-)
+    VIEW_HABITS,
+    VIEW_PUBLIC_HABITS,
+) = range(29)
 
 MAIN_MENU_KEYBOARD = [
     ["➕ Добавить любимое действие", "➕ Добавить нужное действие"],
@@ -189,6 +171,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ),
     )
     return MENU
+
 
 # LikeAction
 async def create_like_action_start(
@@ -357,9 +340,7 @@ async def create_location_description(
         name=location_name, description=location_description, owner=django_user
     )
 
-    await update.message.reply_text(
-        f"Локация '{location_name}' успешно создана!"
-    )
+    await update.message.reply_text(f"Локация '{location_name}' успешно создана!")
 
     caller_state = context.user_data.get("caller_state")
     if caller_state == CREATE_NICE_HABIT_SELECT_LOCATION:
@@ -1123,7 +1104,9 @@ async def get_django_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     return MENU
 
 
-async def get_django_public_habits(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def get_django_public_habits(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
     """Получает публичные полезные привычки"""
     django_user = context.user_data["django_user"]
     need_habits = await sync_to_async(
@@ -1143,7 +1126,7 @@ async def get_django_public_habits(update: Update, context: ContextTypes.DEFAULT
                             if nh.need_action
                             else f"Полезная привычка ID:{nh.id}"
                         ),
-                        callback_data="-", #реализовать установку себе чужой привычки
+                        callback_data="-",  # реализовать установку себе чужой привычки
                     )
                 ]
             )
@@ -1151,14 +1134,12 @@ async def get_django_public_habits(update: Update, context: ContextTypes.DEFAULT
     reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
 
     await update.message.reply_text(
-        'Публичные привычки',
+        "Публичные привычки",
         reply_markup=reply_markup,
     )
 
     if not need_habits:
-        await update.message.reply_text(
-            "Тут пока ничего нет! Можете стать первым!"
-        )
+        await update.message.reply_text("Тут пока ничего нет! Можете стать первым!")
         return MENU
     return MENU
 
@@ -1179,26 +1160,26 @@ create_stuff_handler = ConversationHandler(
         MessageHandler(
             filters.Regex(r"^🔓 Публичные привычки$"),
             lambda u, c: check_user_and_call_next(
-                u, c, get_django_public_habits,
+                u,
+                c,
+                get_django_public_habits,
             ),
         ),
         MessageHandler(
             filters.Regex(r"^📊 Мои привычки$"),
             lambda u, c: check_user_and_call_next(
-                u, c, get_django_habits,
+                u,
+                c,
+                get_django_habits,
             ),
         ),
         MessageHandler(
             filters.Regex(r"^➕ Добавить любимое действие$"),
-            lambda u, c: check_user_and_call_next(
-                u, c, create_like_action_start
-            ),
+            lambda u, c: check_user_and_call_next(u, c, create_like_action_start),
         ),
         MessageHandler(
             filters.Regex(r"^➕ Добавить нужное действие$"),
-            lambda u, c: check_user_and_call_next(
-                u, c, create_need_action_start
-            ),
+            lambda u, c: check_user_and_call_next(u, c, create_need_action_start),
         ),
         MessageHandler(
             filters.Regex(r"^➕ Добавить локацию$"),
@@ -1217,9 +1198,7 @@ create_stuff_handler = ConversationHandler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, get_django_public_habits)
         ],
         CREATE_LIKE_ACTION_NAME: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, create_like_action_name
-            )
+            MessageHandler(filters.TEXT & ~filters.COMMAND, create_like_action_name)
         ],
         CREATE_LIKE_ACTION_DESCRIPTION: [
             MessageHandler(
@@ -1227,9 +1206,7 @@ create_stuff_handler = ConversationHandler(
             )
         ],
         CREATE_NEED_ACTION_NAME: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, create_need_action_name
-            )
+            MessageHandler(filters.TEXT & ~filters.COMMAND, create_need_action_name)
         ],
         CREATE_NEED_ACTION_DESCRIPTION: [
             MessageHandler(
@@ -1237,22 +1214,16 @@ create_stuff_handler = ConversationHandler(
             )
         ],
         CREATE_LOCATION_NAME: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, create_location_name
-            )
+            MessageHandler(filters.TEXT & ~filters.COMMAND, create_location_name)
         ],
         CREATE_LOCATION_DESCRIPTION: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, create_location_description
-            )
+            MessageHandler(filters.TEXT & ~filters.COMMAND, create_location_description)
         ],
         CREATE_REWARD_NAME: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, create_reward_name)
         ],
         CREATE_REWARD_DESCRIPTION: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, create_reward_description
-            )
+            MessageHandler(filters.TEXT & ~filters.COMMAND, create_reward_description)
         ],
     },
     fallbacks=[CommandHandler("cancel", cancel)],
@@ -1264,9 +1235,7 @@ create_nice_habit_conv_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
             filters.Regex(r"^✨ Создать приятную привычку$"),
-            lambda u, c: check_user_and_call_next(
-                u, c, create_nice_habit_start
-            ),
+            lambda u, c: check_user_and_call_next(u, c, create_nice_habit_start),
         )
     ],
     states={
@@ -1303,9 +1272,7 @@ create_nice_habit_conv_handler = ConversationHandler(
         CREATE_LOCATION_NAME: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                lambda u, c: check_user_and_call_next(
-                    u, c, create_location_name
-                ),
+                lambda u, c: check_user_and_call_next(u, c, create_location_name),
             )
         ],
         CREATE_LOCATION_DESCRIPTION: [
@@ -1326,9 +1293,7 @@ create_useful_habit_conv_handler = ConversationHandler(
     entry_points=[
         MessageHandler(
             filters.Regex(r"^📝 Создать полезную привычку$"),
-            lambda u, c: check_user_and_call_next(
-                u, c, create_useful_habit_start
-            ),
+            lambda u, c: check_user_and_call_next(u, c, create_useful_habit_start),
         )
     ],
     states={
@@ -1421,17 +1386,13 @@ create_useful_habit_conv_handler = ConversationHandler(
         CREATE_REWARD_DESCRIPTION: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                lambda u, c: check_user_and_call_next(
-                    u, c, create_reward_description
-                ),
+                lambda u, c: check_user_and_call_next(u, c, create_reward_description),
             )
         ],
         CREATE_LOCATION_NAME: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                lambda u, c: check_user_and_call_next(
-                    u, c, create_location_name
-                ),
+                lambda u, c: check_user_and_call_next(u, c, create_location_name),
             )
         ],
         CREATE_LOCATION_DESCRIPTION: [
@@ -1446,4 +1407,3 @@ create_useful_habit_conv_handler = ConversationHandler(
     fallbacks=[CommandHandler("cancel", cancel)],
     map_to_parent={MENU: MENU},
 )
-

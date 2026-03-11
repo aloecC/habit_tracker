@@ -8,12 +8,13 @@ class IsModerator(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return (
-            request.user.is_authenticated and request.user.groups.filter(name="Модераторы").exists()
+            request.user.is_authenticated
+            and request.user.groups.filter(name="Модераторы").exists()
         )
 
 
 class IsOwner(permissions.BasePermission):
-    '''Разрешение на доступ владельцу'''
+    """Разрешение на доступ владельцу"""
 
     def has_permission(self, request, view):
         return request.user == view.get_object().owner

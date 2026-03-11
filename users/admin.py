@@ -8,7 +8,7 @@ class CustomUserAdmin(UserAdmin):
     """Административный интерфейс для управления пользователями."""
 
     model = User
-    list_display = ['id', "email", "username", "phone_number", "is_staff", "is_active"]
+    list_display = ["id", "email", "username", "phone_number", "is_staff", "is_active"]
     list_filter = ["is_staff", "is_active"]
     ordering = ["email"]
     search_fields = ["email", "username"]

@@ -5,12 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from locareward.models import LikeAction, Location, NeedAction, Reward
 from locareward.paginators import LocarewardPagination
 from locareward.permisions import IsModerator, IsOwner
-from locareward.serializers import (
-    LikeActionSerializer,
-    LocationSerializer,
-    NeedActionSerializer,
-    RewardSerializer,
-)
+from locareward.serializers import (LikeActionSerializer, LocationSerializer,
+                                    NeedActionSerializer, RewardSerializer)
 
 
 class LocationViewSet(viewsets.ModelViewSet):
