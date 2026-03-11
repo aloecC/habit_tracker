@@ -116,19 +116,61 @@ jobs:
                     username: ${{ secrets.SERVER_USER }}
                     key: ${{ secrets.SSH_PRIVATE_KEY }}
                     script: |
+
                         mkdir -p ~/habit_tracker
                         cd ~/habit_tracker
+
 
                         if [ ! -d ".git" ]; then
                           git init
                           git remote add origin https://github.com/${{ github.repository }}.git
                         fi
-
                         git fetch --all
                         git checkout -f master || git checkout -f main
                         git pull origin master || git pull origin main
 
-                        docker-compose up -d --build
+                        if [ ! -f ".env" ]; then
+                          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+                          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+                          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+                          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+                          echo "ALLOWED_HOSTS=158.160.28.109,localhost,127.0.0.1" >> .env
+                          echo "DEBUG=False" >> .env
 
-                        docker-compose exec -T app python manage.py migrate
-                        docker-compose exec -T app python manage.py collectstatic --noinput
+                        fi
+
+
+                        docker build . --file Dockerfile --tag habit_tracker_bot:latest
+
+
+                        docker stop habit_tracker_db || true
+                        docker rm habit_tracker_db || true
+                        docker stop habit_tracker_redis || true
+                        docker rm habit_tracker_redis || true
+                        docker stop habit_tracker_app || true
+                        docker rm habit_tracker_app || true
+
+
+                        docker run -d --name habit_tracker_db \
+                          -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+                          -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+                          -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+                          -v postgres_data:/var/lib/postgresql/data \
+                          postgres:17
+
+                        docker run -d --name habit_tracker_redis \
+                          -p 6379:6379 \
+                          redis:alpine
+
+                        sleep 10
+
+                        docker run -d --name habit_tracker_app \
+                          -p 8000:8000 \
+                          --env-file .env \
+                          -v $(pwd):/app \
+                          -v media:/app/media \
+                          habit_tracker_bot:latest
+
+                        sleep 5
+                        docker exec habit_tracker_app python manage.py migrate
+                        docker exec habit_tracker_app python manage.py collectstatic --noinput
